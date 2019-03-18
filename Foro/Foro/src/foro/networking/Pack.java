@@ -21,6 +21,24 @@ public class Pack implements Serializable {
     private int mPostId; // id de la relacion post de la base de datos
     private MyState mState;
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+
+        if (mNick != null) builder.append(String.format("\nNick: %s\n", mNick));
+        if (mTopic != null) builder.append(String.format("Topic: %s\n", mTopic));
+        if (mTitle != null) builder.append(String.format("Title: %s\n", mTitle));
+        if (mDescription != null) builder.append(String.format("Description: %s\n", mDescription));
+        if (mFileUrl != null) builder.append(String.format("File Url: %s\n", mFileUrl));
+        if (mDate != null) builder.append(String.format("Date: %s\n", mDate));
+
+        if (mImg != null) builder.append(String.format("img as file: %s\n", mImg));
+        if (mPostId != 0) builder.append(String.format("Post id: %d\n", mPostId));
+        if (mState != null) builder.append(String.format("State: %s\n", mState));
+
+        return builder.toString();
+    }
+
     public Pack() { }
 
     public Pack(MyState state) { mState = state; }

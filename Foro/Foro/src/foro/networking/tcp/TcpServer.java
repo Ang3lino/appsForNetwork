@@ -37,7 +37,7 @@ public class TcpServer implements Runnable {
             try {
                 socket = serverSocket.accept();
 		        Pack pack = (Pack) UtilFun.deserialize(socket); // importante castear
-            } catch (IOException | CalssNotFoundException e) {
+            } catch (IOException | ClassNotFoundException e) {
                 System.out.println("Something went wrong with TCP connection.");
                 e.printStackTrace();
             }     
