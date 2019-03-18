@@ -13,7 +13,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import foro.networking.UtilFun;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -26,6 +29,9 @@ import java.util.logging.Logger;
 public class TcpServer implements Runnable {
     private ServerSocket serverSocket;
     private Socket socket;
+    private ObjectOutputStream oos;
+    private ObjectInputStream ois;
+
 
     public TcpServer() {
         try {
@@ -37,18 +43,8 @@ public class TcpServer implements Runnable {
 
     private void buildPosts() throws SQLException, IOException {
         System.out.println("It works!");
-        /*
         ArrayList<Pack> packs = DBHelper.listPost();
-        byte[] packsAsBytes = UtilFun.serialize(packs);
-        int len = packsAsBytes.length;
-        DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
-        dos.writeInt(len);
-        int count = 0, n = 2048;
-        while (count < len) {
-            dos.write(packsAsBytes, count, n);
-            count += n;
-        }
-        */
+        oos.writeObject(packs);
     }
 
     @Override
@@ -56,9 +52,14 @@ public class TcpServer implements Runnable {
         while (true) {
             Pack pack = null;
             try {
-                System.out.println("Esperando una conexion");
+                System.out.println("Waiting a connection");
                 socket = serverSocket.accept();
-		        pack = (Pack) UtilFun.deserialize(socket); // importante castear
+
+                ois = new ObjectInputStream(socket.getInputStream());
+                oos = new ObjectOutputStream(socket.getOutputStream());
+
+                pack = (Pack) ois.readObject();
+
                 switch (pack.getState()) {
                     case LOG_IN: buildPosts(); break;
                 }
@@ -72,4 +73,5 @@ public class TcpServer implements Runnable {
     public static void main(String args[]) {
         new Thread(new TcpServer()).start();
     }
+
 }

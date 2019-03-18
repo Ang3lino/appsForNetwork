@@ -12,9 +12,12 @@ import foro.networking.UtilFun;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -22,42 +25,35 @@ import java.util.ArrayList;
  */
 public class TcpClient {
     private Socket socket;
-    private DataOutputStream dos;    
-    private DataInputStream dis;    
+    private ObjectOutputStream oos;   
+    private ObjectInputStream ois; 
 
     public TcpClient() {
         try {
             socket = new Socket(Const.HOST, Const.PORT);
             socket.setReuseAddress(true);
-            //dos = new DataOutputStream(socket.getOutputStream());
+
+            oos = new ObjectOutputStream(socket.getOutputStream());
+            ois = new ObjectInputStream(socket.getInputStream());
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public ArrayList<Pack> getListPost() throws IOException, ClassNotFoundException {
-        ArrayList<Pack> list = new ArrayList<>();
-        Pack pack = new Pack(MyState.LOG_IN);
-        dis = new DataInputStream(socket.getInputStream());
-        ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-
-        oos.writeObject(pack);
-        
-        /*
-        int count = 0;
-        int length = dis.readInt();
-
-        byte[] listAsBytes = new byte[length];
-        byte[] buff = new byte[2048];
-
-        while (count < length){
-            int n = dis.read(buff);
-            count += n;
-            System.arraycopy(listAsBytes, count, buff, 0, n);
+    public void closeSocket() { 
+        if (socket != null) {
+            try {
+                socket.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            } 
         }
+    }
 
-        list = (ArrayList<Pack>) UtilFun.deserialize(listAsBytes);
-        */
+    public ArrayList<Pack> getListPost() throws IOException, ClassNotFoundException {
+        Pack pack = new Pack(MyState.LOG_IN);
+        oos.writeObject(pack); // request the list port to the server
+        ArrayList<Pack> list = (ArrayList<Pack>) ois.readObject();
         return list;
     }
 
