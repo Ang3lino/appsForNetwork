@@ -1,0 +1,67 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package foro.networking;
+
+import java.io.File;
+import java.io.Serializable;
+
+/**
+ *
+ * @author Sigma
+ */
+public class Pack implements Serializable {
+    // establecer el valor en caso de implementar la clase Serializable
+    public static final long serialVersionUID = 1L;
+
+    private String mNick, mTopic, mTitle, mDescription, mFileUrl, mDate;
+    private File mImg; // guardara la imagen
+    private int mPostId; // id de la relacion post de la base de datos
+    private MyState mState;
+
+    public Pack() { }
+
+    public Pack(MyState state) { mState = state; }
+
+    public MyState getState() { return mState; }
+
+    public void addUserPost(String nick, String topic) {
+        mNick = nick;
+        mTopic = topic;
+    }
+    
+    public void setTitle(String title) { mTitle = title; }
+    public void setDate(String date) { mDate = date; }
+
+    public void addPost(String title, String description) {
+        mTitle = title;
+        mDescription = description;
+    }
+
+    public void addPost(String title, String desc, File file) {
+        addPost(title, desc);
+        mImg = file;
+    }
+
+    public void addPost(String title, String desc, String url) {
+        addPost(title, desc);
+        mFileUrl = url;
+    }
+
+    public void setPostId(int id) {
+        mPostId = id;
+    }
+
+    public String getNick() { return mNick; }
+    public String getTopic() { return mTopic; }
+    public String getTitle() { return mTitle; }
+    public String getDescription() { return mDescription; }
+    public String getFileUrl() { return mFileUrl; }
+
+    public File getImage () { return mImg; }
+
+    public int getPostId() { return mPostId; }
+
+}
