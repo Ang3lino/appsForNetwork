@@ -39,11 +39,11 @@ END &
 DELIMITER ; -- end definition =================================================
 
 
+	--SELECT 	p.title, p.description, p.img_url, u.nick, u.post_date, u.category
 DELIMITER &
 CREATE PROCEDURE find_by_keyword(IN p_key VARCHAR(64)) 
 BEGIN
 
-	--SELECT 	p.title, p.description, p.img_url, u.nick, u.post_date, u.category
 	SELECT 	p.id, p.title, u.post_date 
 	FROM post p, user_post u 
 	WHERE p.id = u.id_post
