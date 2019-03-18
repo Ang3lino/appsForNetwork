@@ -44,6 +44,7 @@ public class DBHelper {
     }
 
     public static ArrayList<Pack> listPost() throws SQLException, IOException {
+        System.out.println("List Post method called "); 
         Connection conn = getConnection();
         Statement statement = conn.createStatement();
         ResultSet set = statement.executeQuery("call get_list_post()");
@@ -61,18 +62,33 @@ public class DBHelper {
 
         list.forEach(p -> { System.out.println(p); } );
 
-        byte[] arrListBytes = UtilFun.serialize(list);
-        Object[] packs = list.toArray();
-        byte[] arrBytes = UtilFun.serialize(packs);
+        return list;
+    }
 
-        System.out.println(arrListBytes.length);
-        System.out.println(arrBytes.length);
+    public static ArrayList<Pack> findByKeyword(String keyword) throws SQLException, IOException {
+        System.out.println("findBykeyword method called "); 
+
+        Connection conn = getConnection();
+        Statement statement = conn.createStatement();
+        String query = String.format("call find_by_keyword(\"%s\")", keyword); 
+        System.out.println(query); 
+        ResultSet set = statement.executeQuery(query);
+
+        ArrayList<Pack> list = new ArrayList<>();
+        while (set.next()) {
+            Pack pack = new Pack();
+            pack.setTitle(set.getString("title"));
+            pack.setDate(set.getString("post_date"));
+            pack.setPostId(set.getInt("id"));
+            list.add(pack);
+        }
+
+        set.close();
+
+        list.forEach(p -> { System.out.println(p); } );
 
         return list;
     }
 
-    public static void main(String args[]) throws SQLException, IOException {
-        listPost();
 
-    }
 }

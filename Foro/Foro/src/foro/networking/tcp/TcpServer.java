@@ -41,10 +41,22 @@ public class TcpServer implements Runnable {
         }
     }
 
-    private void buildPosts() throws SQLException, IOException {
-        System.out.println("It works!");
-        ArrayList<Pack> packs = DBHelper.listPost();
-        oos.writeObject(packs);
+    private void buildPosts() {
+        try {
+            ArrayList<Pack> packs = DBHelper.listPost();
+            oos.writeObject(packs);
+        } catch (SQLException | IOException e) {
+            e.printStackTrace();
+        } 
+    }
+
+    public void buildFindByKeyword(String keyword) {
+        try {
+            ArrayList<Pack> packs = DBHelper.findByKeyword(keyword);
+            oos.writeObject(packs);
+        } catch (SQLException | IOException e) {
+            e.printStackTrace();
+        } 
     }
 
     @Override
@@ -62,8 +74,9 @@ public class TcpServer implements Runnable {
 
                 switch (pack.getState()) {
                     case LOG_IN: buildPosts(); break;
+                    case SEARCH: buildFindByKeyword(pack.getKeyword()); break;
                 }
-            } catch (IOException | ClassNotFoundException | SQLException e) {
+            } catch (IOException | ClassNotFoundException e) {
                 System.out.println("Something went wrong with TCP connection.");
                 e.printStackTrace();
             }     

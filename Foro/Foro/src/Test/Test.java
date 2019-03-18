@@ -18,7 +18,13 @@ public class Test {
     
     public static void main(String args[]) throws IOException, ClassNotFoundException {
         TcpClient client = new TcpClient();
-        ArrayList<Pack> packs = client.getListPost();
+
+        ArrayList<Pack> packs;
+        //packs = client.getListPost();
+        //packs.forEach(p -> { System.out.println(p); } );
+        packs = client.getPostsByKeyword("Un");
+        packs.forEach(p -> { System.out.println(p); } );
+        packs = client.getPostsByKeyword("Acuchillado");
         packs.forEach(p -> { System.out.println(p); } );
     }
 }

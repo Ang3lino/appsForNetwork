@@ -50,11 +50,47 @@ public class TcpClient {
         }
     }
 
-    public ArrayList<Pack> getListPost() throws IOException, ClassNotFoundException {
-        Pack pack = new Pack(MyState.LOG_IN);
-        oos.writeObject(pack); // request the list port to the server
-        ArrayList<Pack> list = (ArrayList<Pack>) ois.readObject();
-        return list;
+    public ArrayList<Pack> getPostsByKeyword(String keyword) {
+        Pack pack = new Pack(MyState.SEARCH);
+        pack.setKeyword(keyword);
+        ArrayList<Pack> matchables = null;
+        try {
+            oos.writeObject(pack); // request
+            matchables = (ArrayList<Pack>) ois.readObject();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally{
+            return matchables; // returns null if exception catched
+        }
+    }
+
+    public void uploadPack(Pack pack) {
+        
+    }
+
+    public Pack downloadPack(int postId) {
+        Pack pack = null;
+        return pack;
+    }
+
+    /**
+     * Metodo que pide la lista de posts hechos en el foro, retorna null en caso
+     * de algun error.
+     * @return
+     * @throws IOException
+     * @throws ClassNotFoundException 
+     */
+    public ArrayList<Pack> getListPost() {
+        ArrayList<Pack> list = null;
+        try {
+            Pack pack = new Pack(MyState.LOG_IN);
+            oos.writeObject(pack); // request the list port to the server
+            list = (ArrayList<Pack>) ois.readObject(); // response
+        } catch (IOException | ClassNotFoundException e) { 
+            e.printStackTrace(); 
+        } finally { 
+            return list; 
+        }
     }
 
 }

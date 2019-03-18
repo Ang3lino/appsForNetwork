@@ -16,7 +16,7 @@ public class Pack implements Serializable {
     // establecer el valor en caso de implementar la clase Serializable
     public static final long serialVersionUID = 1L;
 
-    private String mNick, mTopic, mTitle, mDescription, mFileUrl, mDate;
+    private String mNick, mTopic, mTitle, mDescription, mFileUrl, mDate, mKeyword;
     private File mImg; // guardara la imagen
     private int mPostId; // id de la relacion post de la base de datos
     private MyState mState;
@@ -32,6 +32,7 @@ public class Pack implements Serializable {
                 mDescription));
         if (mFileUrl != null) builder.append(String.format("File Url: %s\n", mFileUrl));
         if (mDate != null) builder.append(String.format("Date: %s\n", mDate));
+        if (mKeyword != null) builder.append(String.format("Keyword: %s\n", mKeyword));
 
         if (mImg != null) builder.append(String.format("img as file: %s\n", mImg));
         if (mPostId != 0) builder.append(String.format("Post id: %d\n", mPostId));
@@ -44,15 +45,11 @@ public class Pack implements Serializable {
 
     public Pack(MyState state) { mState = state; }
 
-    public MyState getState() { return mState; }
-
     public void addUserPost(String nick, String topic) {
         mNick = nick;
         mTopic = topic;
     }
     
-    public void setTitle(String title) { mTitle = title; }
-    public void setDate(String date) { mDate = date; }
 
     public void addPost(String title, String description) {
         mTitle = title;
@@ -69,10 +66,16 @@ public class Pack implements Serializable {
         mFileUrl = url;
     }
 
-    public void setPostId(int id) {
-        mPostId = id;
-    }
+    // setters =================================================================
+    public void setPostId(int id) { mPostId = id; }
+    public void setKeyword(String keyword) { mKeyword = keyword; }
+    public void setTitle(String title) { mTitle = title; }
+    public void setDate(String date) { mDate = date; }
 
+    // getters =================================================================
+    public MyState getState() { return mState; }
+
+    public String getKeyword() { return mKeyword; }
     public String getNick() { return mNick; }
     public String getTopic() { return mTopic; }
     public String getTitle() { return mTitle; }
