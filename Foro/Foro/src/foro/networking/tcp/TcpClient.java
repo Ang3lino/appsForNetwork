@@ -3,14 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package foro.networking;
+package foro.networking.tcp;
 
 /**
  *
  * @author Sigma
  */
-public class Const {
-    public static final int PORT = 1978;
-    public static final String HOST = "127.0.0.1";
-
+public class TcpClient {
+    
 }
