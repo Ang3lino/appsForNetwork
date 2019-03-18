@@ -28,7 +28,8 @@ public class Pack implements Serializable {
         if (mNick != null) builder.append(String.format("\nNick: %s\n", mNick));
         if (mTopic != null) builder.append(String.format("Topic: %s\n", mTopic));
         if (mTitle != null) builder.append(String.format("Title: %s\n", mTitle));
-        if (mDescription != null) builder.append(String.format("Description: %s\n", mDescription));
+        if (mDescription != null) builder.append(String.format("Description: %s\n", 
+                mDescription));
         if (mFileUrl != null) builder.append(String.format("File Url: %s\n", mFileUrl));
         if (mDate != null) builder.append(String.format("Date: %s\n", mDate));
 
