@@ -10,6 +10,7 @@ import foro.networking.Pack;
 import foro.networking.UtilFun;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -110,5 +111,29 @@ public class DBHelper {
         statement.executeQuery(query);
     }
 
+    public static Pack getPost(int postId) throws SQLException {
+        System.out.println("getPost method called "); 
+        Connection conn = getConnection();
+        Statement statement = conn.createStatement();
+        String query = String.format("call get_post(%d)", postId); 
+        System.out.println(query); 
+        ResultSet set = statement.executeQuery(query);
+
+        set.next(); // expect only one result, hence no while loop
+
+        Pack pack = new Pack();
+        String imgUrl = set.getString("img_url");
+        File file = null;
+        if (imgUrl != null) {
+            String path = Paths.get("img", imgUrl).toString();
+            file = new File(path);
+        }
+        pack.addPost(set.getString("nick"), set.getString("category"), 
+                set.getString("title"), set.getString("description"), 
+                imgUrl);
+        pack.setFile(file);
+        set.close();
+        return pack;
+    }
 
 }

@@ -46,12 +46,23 @@ public class Pack implements Serializable {
     public Pack(MyState state) { mState = state; }
 
     public void addPost(String nick, String topic, String title, 
-                String description, File img) {
+                String description) {
         mNick = nick;
         mTopic = topic;
         mTitle = title;
         mDescription = description;
+    }
+
+    public void addPost(String nick, String topic, String title, 
+                        String description, File img) {
+        addPost(nick, topic, title, description);
         mImg = img;
+    }
+
+    public void addPost(String nick, String topic, String title, 
+                        String description, String imageUrl) {
+        addPost(nick, topic, title, description);
+        mFileUrl = imageUrl;
     }
 
     // setters =================================================================
@@ -59,6 +70,7 @@ public class Pack implements Serializable {
     public void setKeyword(String keyword) { mKeyword = keyword; }
     public void setTitle(String title) { mTitle = title; }
     public void setDate(String date) { mDate = date; }
+    public void setFile(File file) { mImg = file; }
 
     // getters =================================================================
     public MyState getState() { return mState; }
@@ -73,5 +85,9 @@ public class Pack implements Serializable {
     public File getImage () { return mImg; }
 
     public int getPostId() { return mPostId; }
+
+    public void setNick(String string) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
 }

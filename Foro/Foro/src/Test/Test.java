@@ -67,9 +67,13 @@ public class Test {
         packs = client.getPostsByKeyword("Acuchillado");
         packs.forEach(p -> { System.out.println(p); } );
     }
+
+    public static void downloadFile() throws IOException, ClassNotFoundException {
+        TcpClient client = new TcpClient();
+        Pack pack = client.downloadPack(8); 
+    }
     
     public static void main(String args[]) throws IOException, ClassNotFoundException {
-        uploadFile();
-        
+        uploadFile(); 
     }
 }

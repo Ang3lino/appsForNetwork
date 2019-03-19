@@ -38,6 +38,17 @@ BEGIN
 END &
 DELIMITER ; -- end definition =================================================
 
+DELIMITER &
+CREATE PROCEDURE get_post(IN p_id_post INT) 
+BEGIN
+
+	SELECT 	u.nick, u.post_date, u.category, p.title, p.description, p.img_url
+	FROM post p, user_post u 
+	WHERE p.id = u.id_post
+		AND p_id_post = p.id;
+
+END &
+DELIMITER ; -- end definition =================================================
 
 --SELECT 	p.title, p.description, p.img_url, u.nick, u.post_date, u.category
 DELIMITER &

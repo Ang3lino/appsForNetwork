@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -77,7 +78,7 @@ public class TcpClient {
         File file = pack.getImage();
         if (file != null) {
             try {
-                uploadFile(file);
+                UtilFun.uploadFile(file, socket);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -85,27 +86,16 @@ public class TcpClient {
         
     }
 
-    public void uploadFile(File file) throws FileNotFoundException, IOException {
-
-        String name = file.getName();
-        DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
-        DataInputStream dis = new DataInputStream(new FileInputStream(name));
-
-        byte[] b = new byte[2048];
-        long len = file.length();
-        long sentCount = 0;
-        while (sentCount < len) {
-            int n = dis.read(b);
-            dos.write(b, 0, n);
-            dos.flush();
-            sentCount += n;
+    public Pack downloadPack(int postId) throws IOException, ClassNotFoundException {
+        Pack pack = new Pack(MyState.DOWNLOAD);
+        pack.setPostId(postId);
+        oos.writeObject(pack);
+        Pack res = (Pack) ois.readObject();
+        if (res.getImage() != null) {
+            UtilFun.storeFile(res.getImage(), socket, "tmp");
+            String filepath = Paths.get("tmp", res.getImage().getName()).toString();
+            pack.setFile(new File(filepath));
         }
-        dis.close();
-        dos.close();
-    }
-
-    public Pack downloadPack(int postId) {
-        Pack pack = null;
         return pack;
     }
 

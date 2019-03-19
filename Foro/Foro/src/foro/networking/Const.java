@@ -12,5 +12,6 @@ package foro.networking;
 public class Const {
     public static final int PORT = 1978;
     public static final String HOST = "127.0.0.1";
+    public static final int MAX_TCP_LENGTH = 4098;
 
 }
