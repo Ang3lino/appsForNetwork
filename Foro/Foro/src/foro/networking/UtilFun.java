@@ -18,12 +18,12 @@ public class UtilFun {
     public static boolean createFolderToStoreImages(final String folderName) {
         final File folder = new File(folderName);
         if (folder.exists()) {
-            System.out.println("The folder already exists.");
+            System.out.println("[Ok] The folder already exists.");
             return true;   
         } else {
             final boolean created = folder.mkdir();
-            if (created) System.out.println("Folder created");
-            else System.out.println("It couldn't be created");
+            if (created) System.out.println("[Ok] Folder created");
+            else System.out.println("[Error] It couldn't be created");
             return created;
         }
     }
@@ -68,9 +68,9 @@ public class UtilFun {
         dos.close();
     }
 
-    public static void storeFile(File file, Socket socket, String folder) 
+    public static boolean storeFile(File file, Socket socket, String folder) 
             throws FileNotFoundException, IOException {
-        assert createFolderToStoreImages(folder);
+        if ( !createFolderToStoreImages(folder) ) return false;
         
         // A better way to obtain filepath, it offers more compatibility over OS
         String filepath = Paths.get(folder, file.getName()).toString();
@@ -91,5 +91,7 @@ public class UtilFun {
         }
         fos.close();
         dis.close();
+
+	return true;
     }
 }

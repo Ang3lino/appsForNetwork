@@ -92,10 +92,11 @@ public class TcpClient {
         oos.writeObject(pack);
         Pack res = (Pack) ois.readObject();
         if (res.getImage() != null) {
-            UtilFun.storeFile(res.getImage(), socket, "tmp");
-            String filepath = Paths.get("tmp", res.getImage().getName()).toString();
+            UtilFun.storeFile(res.getImage(), socket, Const.CLIENT_FOLDER);
+            String filepath = Paths.get(Const.CLIENT_FOLDER, res.getImage().getName()).toString();
             pack.setFile(new File(filepath));
         }
+	System.out.println(pack);
         return pack;
     }
 

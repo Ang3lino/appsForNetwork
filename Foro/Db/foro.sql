@@ -60,7 +60,8 @@ BEGIN
 	FROM post p, user_post u 
 	WHERE p.id = u.id_post
 		AND ( p.title LIKE v_matchable
-			OR u.post_date LIKE v_matchable )
+			OR u.post_date LIKE v_matchable 
+			OR p.description LIKE v_matchable )
 	ORDER BY p.id, p.title;
 
 END &
@@ -82,7 +83,7 @@ BEGIN
 	INSERT INTO post(title, description, img_url) 
 		VALUES (p_title, p_description, p_img_url);
 
-	SELECT MAX(id) INTO v_last_index FROM POST;
+	SELECT MAX(id) INTO v_last_index FROM post;
 
 	INSERT INTO user_post(nick, id_post, post_date, category)
 		VALUES (p_nick, v_last_index, v_current_date, p_category);

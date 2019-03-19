@@ -23,34 +23,16 @@ import java.util.logging.Logger;
  */
 public class Test {
 
-    public static boolean createFolderToStoreImages() {
-        final String folderName = "img";
-        final File folder = new File(folderName);
-        if (folder.exists()) {
-            System.out.println("The folder already exists.");
-            return true;   
-        } else {
-            final boolean created = folder.mkdir();
-            if (created) System.out.println("Folder created");
-            else System.out.println("It couldn't be created");
-            return created;
-        }
-    }
-
     public static void uploadFile() {
-        Pack pack = new Pack(MyState.UPLOAD);
-
-        // ensure you have permission to write files
-        assert createFolderToStoreImages();
-        File file = new File("escom.jpg");
+        Pack pack = new Pack(MyState.UPLOAD); 
+        File file = new File("escom.jpg"); 
 
         // addPost(String nick, String topic, String title, String description, File img)
         pack.addPost("Om3Ga", "Educacion", "La mejor escuela de ISC en Mexico", 
                 "La ESCOM Se encuentra entre las 10 mejores segun deforma", file);
         TcpClient client = new TcpClient();
         client.uploadPack(pack);
-        
-        //String pathToSave = Paths.get("img", file.getName()).toString(); // img/name
+	client.closeSocket();
     }
 
     public static void search() {
@@ -58,22 +40,30 @@ public class Test {
 
         ArrayList<Pack> packs;
 
-        packs = client.getListPost();
+	// obten la lista para inicializar los post, retorna titurlo, fecha e id del post
+        packs = client.getListPost(); 
         packs.forEach(p -> { System.out.println(p); } );
-
+	
+	// obten los post que concidan con la palabra clave en titulo, fecha o descripcion 
+	// (ver procedimiento find_by_keyword(keyword: VARCHAR)
         packs = client.getPostsByKeyword("Un");
         packs.forEach(p -> { System.out.println(p); } );
 
         packs = client.getPostsByKeyword("Acuchillado");
         packs.forEach(p -> { System.out.println(p); } );
+	client.closeSocket();
     }
 
     public static void downloadFile() throws IOException, ClassNotFoundException {
         TcpClient client = new TcpClient();
+	// Download a file given an id
         Pack pack = client.downloadPack(8); 
+	// The file where the file is saved is in pack.getImage() which is a file
+	File file = pack.getImage();
+	client.closeSocket();
     }
     
     public static void main(String args[]) throws IOException, ClassNotFoundException {
-        uploadFile(); 
+        downloadFile(); 
     }
 }

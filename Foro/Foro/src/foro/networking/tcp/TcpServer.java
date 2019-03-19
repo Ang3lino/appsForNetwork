@@ -45,6 +45,9 @@ public class TcpServer implements Runnable {
         }
     }
 
+    /**
+     * Pass a list of Pack, these will have id, title and post_date
+     */
     private void buildPosts() {
         try {
             ArrayList<Pack> packs = DBHelper.listPost();
@@ -54,6 +57,10 @@ public class TcpServer implements Runnable {
         }
     }
 
+    /**
+     * Send a list of packs which match with the keyword given.
+     * @param keyword 
+     */
     public void buildFindByKeyword(String keyword) {
         try {
             ArrayList<Pack> packs = DBHelper.findByKeyword(keyword);
@@ -63,12 +70,16 @@ public class TcpServer implements Runnable {
         }
     }
 
+    /**
+     * Method called when the request has the UPLOAD state.
+     * @param pack 
+     */
     public void storePost(Pack pack) {
         try {
             DBHelper.appendPost(pack);
             File file = pack.getImage();
             if (file != null) {
-                UtilFun.storeFile(file, socket, "img/");
+                UtilFun.storeFile(file, socket, Const.SERVER_FOLDER);
             }
         } catch (SQLException ex) {
             Logger.getLogger(TcpServer.class.getName()).log(Level.SEVERE, null, ex);
@@ -77,16 +88,21 @@ public class TcpServer implements Runnable {
         }
     }
 
+    /**
+     * If the user uploaded a file previously we'll send it, the client will store
+     * the file in a folder Const.CLIENT_FOLDER
+     * @param pack 
+     */
     public void processDownload(Pack pack) {
         try {
             Pack res = DBHelper.getPost(pack.getPostId());
             oos.writeObject(res);
-            if (res.getFileUrl() != null) { // The post has an image
+            if (res.getImage() != null) { // The post has an image
                 UtilFun.uploadFile(res.getImage(), socket);
             }
         } catch (SQLException | IOException e) {
             e.printStackTrace();
-        }
+        }   
     }
 
     @Override
@@ -97,6 +113,7 @@ public class TcpServer implements Runnable {
                 System.out.println("Waiting a connection");
                 socket = serverSocket.accept();
 
+		// Prepare to receive objects
                 ois = new ObjectInputStream(socket.getInputStream());
                 oos = new ObjectOutputStream(socket.getOutputStream());
 

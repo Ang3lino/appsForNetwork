@@ -24,6 +24,7 @@ import java.util.ArrayList;
  */
 public class DBHelper {
 
+    // Database parameters, change them if necessary
     private static final String URL = "jdbc:mysql://localhost/";
     private static final String DB_NAME = "forum";
     private static final String DRIVER = "com.mysql.jdbc.Driver";
@@ -32,6 +33,10 @@ public class DBHelper {
 
     private static Connection connection;
 
+    /**
+     * 
+     * @return safe connection (not null).
+     */
     public static Connection getConnection() {
         if (connection == null) {
             try {
@@ -97,7 +102,7 @@ public class DBHelper {
 
         Connection conn = getConnection();
         Statement statement = conn.createStatement();
-
+	
         File file = pack.getImage();
         boolean hasFile = file != null;
         String query = String.format(
@@ -132,6 +137,7 @@ public class DBHelper {
                 set.getString("title"), set.getString("description"), 
                 imgUrl);
         pack.setFile(file);
+	System.out.println(pack);
         set.close();
         return pack;
     }
