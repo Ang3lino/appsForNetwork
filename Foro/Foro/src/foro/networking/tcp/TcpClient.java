@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Sigma
+ * @author Angel Lopez Manriquez
  */
 public class TcpClient {
     private Socket socket;
