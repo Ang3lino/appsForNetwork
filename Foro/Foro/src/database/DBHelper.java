@@ -105,7 +105,7 @@ public class DBHelper {
                 pack.getTopic(), 
                 pack.getTitle(), 
                 pack.getDescription(), 
-                (hasFile) ? file.getName() : "null" ); 
+                (hasFile) ? "\"" + file.getName() + "\"" : "null" ); 
         System.out.println(query); 
         statement.executeQuery(query);
     }

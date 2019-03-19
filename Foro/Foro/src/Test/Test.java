@@ -46,7 +46,7 @@ public class Test {
 
         // addPost(String nick, String topic, String title, String description, File img)
         pack.addPost("Om3Ga", "Educacion", "La mejor escuela de ISC en Mexico", 
-                "La ESCOM Se encuentra entre las 10 mejores segun deforma", null);
+                "La ESCOM Se encuentra entre las 10 mejores segun deforma", file);
         TcpClient client = new TcpClient();
         client.uploadPack(pack);
         

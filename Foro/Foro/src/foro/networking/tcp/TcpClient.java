@@ -86,20 +86,13 @@ public class TcpClient {
     }
 
     public void uploadFile(File file) throws FileNotFoundException, IOException {
-        String name = file.getAbsolutePath();
-        long len = file.length();
 
+        String name = file.getName();
         DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
         DataInputStream dis = new DataInputStream(new FileInputStream(name));
 
-        dos.writeUTF(name); // ASCII ONLY
-        dos.flush();
-
-        dos.writeLong(len);
-        dos.flush();
-
-        byte[] b = new byte[4096];
-
+        byte[] b = new byte[2048];
+        long len = file.length();
         long sentCount = 0;
         while (sentCount < len) {
             int n = dis.read(b);
