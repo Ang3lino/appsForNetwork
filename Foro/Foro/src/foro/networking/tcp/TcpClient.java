@@ -11,6 +11,9 @@ import foro.networking.Pack;
 import foro.networking.UtilFun;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -64,8 +67,48 @@ public class TcpClient {
         }
     }
 
+    // pack must have UPLOAD as state, otherwise it won't do its work
     public void uploadPack(Pack pack) {
+        try {
+            oos.writeObject(pack);
+        } catch (IOException ex) {
+            Logger.getLogger(TcpClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        File file = pack.getImage();
+        if (file != null) {
+            try {
+                uploadFile(file);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         
+    }
+
+    public void uploadFile(File file) throws FileNotFoundException, IOException {
+        String name = file.getAbsolutePath();
+        long len = file.length();
+
+        DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+        DataInputStream dis = new DataInputStream(new FileInputStream(name));
+
+        dos.writeUTF(name); // ASCII ONLY
+        dos.flush();
+
+        dos.writeLong(len);
+        dos.flush();
+
+        byte[] b = new byte[4096];
+
+        long sentCount = 0;
+        while (sentCount < len) {
+            int n = dis.read(b);
+            dos.write(b, 0, n);
+            dos.flush();
+            sentCount += n;
+        }
+        dis.close();
+        dos.close();
     }
 
     public Pack downloadPack(int postId) {

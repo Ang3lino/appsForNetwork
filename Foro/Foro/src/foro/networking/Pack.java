@@ -45,25 +45,13 @@ public class Pack implements Serializable {
 
     public Pack(MyState state) { mState = state; }
 
-    public void addUserPost(String nick, String topic) {
+    public void addPost(String nick, String topic, String title, 
+                String description, File img) {
         mNick = nick;
         mTopic = topic;
-    }
-    
-
-    public void addPost(String title, String description) {
         mTitle = title;
         mDescription = description;
-    }
-
-    public void addPost(String title, String desc, File file) {
-        addPost(title, desc);
-        mImg = file;
-    }
-
-    public void addPost(String title, String desc, String url) {
-        addPost(title, desc);
-        mFileUrl = url;
+        mImg = img;
     }
 
     // setters =================================================================

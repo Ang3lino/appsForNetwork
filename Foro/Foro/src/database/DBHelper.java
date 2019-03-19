@@ -8,6 +8,7 @@ package database;
 import com.mysql.jdbc.Connection;
 import foro.networking.Pack;
 import foro.networking.UtilFun;
+import java.io.File;
 import java.io.IOException;
 
 import java.sql.DriverManager;
@@ -88,6 +89,25 @@ public class DBHelper {
         list.forEach(p -> { System.out.println(p); } );
 
         return list;
+    }
+
+    public static void appendPost(Pack pack) throws SQLException, IOException {
+        System.out.println("appendPost method called "); 
+
+        Connection conn = getConnection();
+        Statement statement = conn.createStatement();
+
+        File file = pack.getImage();
+        boolean hasFile = file != null;
+        String query = String.format(
+                "call add_post(\"%s\", \"%s\", \"%s\", \"%s\", %s)", 
+                pack.getNick(), 
+                pack.getTopic(), 
+                pack.getTitle(), 
+                pack.getDescription(), 
+                (hasFile) ? file.getName() : "null" ); 
+        System.out.println(query); 
+        statement.executeQuery(query);
     }
 
 

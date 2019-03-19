@@ -59,6 +59,20 @@ public class TcpServer implements Runnable {
         } 
     }
 
+    public void storeImage(Pack pack) {
+        
+    }
+    
+    public void storePost(Pack pack) {
+        try {
+            DBHelper.appendPost(pack);
+        } catch (SQLException ex) {
+            Logger.getLogger(TcpServer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(TcpServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     @Override
     public void run() {
         while (true) {
@@ -75,6 +89,7 @@ public class TcpServer implements Runnable {
                 switch (pack.getState()) {
                     case LOG_IN: buildPosts(); break;
                     case SEARCH: buildFindByKeyword(pack.getKeyword()); break;
+                    case UPLOAD: storePost(pack);
                 }
             } catch (IOException | ClassNotFoundException e) {
                 System.out.println("Something went wrong with TCP connection.");

@@ -5,41 +5,34 @@
  */
 package foro;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 /**
  *
  * @author wwwda
  */
 public class Foro {
 public String Usuario;
-public Login login;  
-public Publicaciones pub;
+   
 public Foro(){
-    login=new Login();
-    
-    
 }
 public void setUsuario(){
-
+  Login login=new Login();
         while(!login.getREGISTRADO()){
          login.setVisible(true);
             System.out.println("dentro del ciclo");
         }
         
-        Usuario=login.getUsuario();  
-        
-        pub=new Publicaciones(Usuario);
-     
+        Usuario=login.getUsuario();   
+        if(login.getREGISTRADO()){
          System.out.println("El usuario es: "+Usuario);
          login.setVisible(false);
-      
+         login.dispose();
+        }
 }
 
-
 public void PantallaPrincipal(){
+ Publicaciones pub=new Publicaciones();
  pub.setVisible(true);
+
 }
 
 
@@ -48,7 +41,6 @@ public void PantallaPrincipal(){
       Foro foro=new Foro();
       foro.setUsuario();
       foro.PantallaPrincipal();
-      
       
             
     }

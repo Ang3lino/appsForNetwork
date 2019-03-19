@@ -53,7 +53,7 @@
 	SELECT * FROM post;
 	SELECT * FROM user_post;
 
-	DELETE FROM post;
-	ALTER TABLE post AUTO_INCREMENT = 1;
-	DELETE FROM user_post;
+--	DELETE FROM post;
+--	ALTER TABLE post AUTO_INCREMENT = 1;
+--	DELETE FROM user_post;
 
