@@ -16,7 +16,8 @@ public class Pack implements Serializable {
     // establecer el valor en caso de implementar la clase Serializable
     public static final long serialVersionUID = 1L;
 
-    private String mNick, mTopic, mTitle, mDescription, mFileUrl, mDate, mKeyword;
+    private String mNick, mTopic, mTitle, mDescription, mFileUrl, mDate, 
+			mKeyword, mComment;
     private File mImg; // guardara la imagen
     private int mPostId; // id de la relacion post de la base de datos
     private MyState mState;
@@ -37,6 +38,7 @@ public class Pack implements Serializable {
         if (mImg != null) builder.append(String.format("img as file: %s\n", mImg));
         if (mPostId != 0) builder.append(String.format("Post id: %d\n", mPostId));
         if (mState != null) builder.append(String.format("State: %s\n", mState));
+		if (mComment != null) builder.append(String.format("Comment: %s\n", mComment));
 
         return builder.toString();
     }
@@ -71,10 +73,12 @@ public class Pack implements Serializable {
     public void setTitle(String title) { mTitle = title; }
     public void setDate(String date) { mDate = date; }
     public void setFile(File file) { mImg = file; }
+	public void setComment(String comment) { this.mComment = comment; }
 
     // getters =================================================================
     public MyState getState() { return mState; }
 
+	public String getComment() { return mComment; }
     public String getKeyword() { return mKeyword; }
     public String getNick() { return mNick; }
     public String getTopic() { return mTopic; }

@@ -78,22 +78,39 @@ public class TcpServer implements Runnable {
 
 				switch (pack.getState()) {
 					case LOG_IN:
-						buildPosts();
-						break;
+						buildPosts(); break;
 					case SEARCH:
-						buildFindByKeyword(pack.getKeyword());
-						break;
+						buildFindByKeyword(pack.getKeyword()); break;
 					case UPLOAD:
-						storePost(pack);
-						break;
+						storePost(pack); break;
 					case DOWNLOAD:
-						processDownload(pack);
-						break;
+						processDownload(pack); break;
+					case COMMENT:
+						processComment(pack); break;
+					case GET_COMMENTS:
+						buildComments(pack); break;
+						
 				}
 			} catch (IOException | ClassNotFoundException e) {
 				e.printStackTrace();
 			}
 		}
+		
+		public void buildComments(Pack p) {
+			try {
+				ArrayList<Pack> packs = DBHelper.getComments(p.getPostId());
+				oos.writeObject(packs);
+			} catch (IOException ex) {
+				Logger.getLogger(TcpServer.class.getName()).log(Level.SEVERE, null, ex);
+			} catch (SQLException ex) {
+				Logger.getLogger(TcpServer.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		}
+		
+		public void processComment(Pack p) {
+			DBHelper.appendComment(p);
+		}
+		
 
 		/**
 		 * Pass a list of Pack, these will have id, title and post_date
