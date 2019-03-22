@@ -23,6 +23,7 @@ import java.io.ObjectOutputStream;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Observable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,7 +31,7 @@ import java.util.logging.Logger;
  *
  * @author Angel Lopez Manriquez
  */
-public class TcpServer implements Runnable {
+public class TcpServer extends Observable implements Runnable {
 
 	private ServerSocket serverSocket;
 
@@ -49,6 +50,7 @@ public class TcpServer implements Runnable {
 				System.out.println("Waiting a connection");
 				Socket socket = serverSocket.accept();
 				new Clone(socket).start();
+                              //  socket.close();
 			} catch (IOException e) {
 				System.out.println("Something went wrong with TCP connection.");
 				e.printStackTrace();
@@ -78,39 +80,23 @@ public class TcpServer implements Runnable {
 
 				switch (pack.getState()) {
 					case LOG_IN:
-						buildPosts(); break;
+						buildPosts();
+						break;
 					case SEARCH:
-						buildFindByKeyword(pack.getKeyword()); break;
+						buildFindByKeyword(pack.getKeyword());
+						break;
 					case UPLOAD:
-						storePost(pack); break;
+						storePost(pack);
+						break;
 					case DOWNLOAD:
-						processDownload(pack); break;
-					case COMMENT:
-						processComment(pack); break;
-					case GET_COMMENTS:
-						buildComments(pack); break;
-						
+						processDownload(pack);
+						break;      
 				}
+                         socket.close();
 			} catch (IOException | ClassNotFoundException e) {
 				e.printStackTrace();
 			}
 		}
-		
-		public void buildComments(Pack p) {
-			try {
-				ArrayList<Pack> packs = DBHelper.getComments(p.getPostId());
-				oos.writeObject(packs);
-			} catch (IOException ex) {
-				Logger.getLogger(TcpServer.class.getName()).log(Level.SEVERE, null, ex);
-			} catch (SQLException ex) {
-				Logger.getLogger(TcpServer.class.getName()).log(Level.SEVERE, null, ex);
-			}
-		}
-		
-		public void processComment(Pack p) {
-			DBHelper.appendComment(p);
-		}
-		
 
 		/**
 		 * Pass a list of Pack, these will have id, title and post_date

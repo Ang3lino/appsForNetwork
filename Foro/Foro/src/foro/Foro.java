@@ -5,6 +5,7 @@
  */
 package foro;
 
+import foro.networking.tcp.TcpServer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -16,24 +17,24 @@ public class Foro {
 public String Usuario;
 public Login login;  
 public Publicaciones pub;
+
+
 public Foro(){
     login=new Login();
-    
     
 }
 public void setUsuario(){
 
-        while(!login.getREGISTRADO()){
+       while(!login.getREGISTRADO()){
          login.setVisible(true);
-            System.out.println("dentro del ciclo");
         }
         
         Usuario=login.getUsuario();  
-        
+        Usuario="david";
         pub=new Publicaciones(Usuario);
      
          System.out.println("El usuario es: "+Usuario);
-         login.setVisible(false);
+      
       
 }
 
@@ -43,12 +44,11 @@ public void PantallaPrincipal(){
 }
 
 
-
     public static void main(String[] args) {
-      Foro foro=new Foro();
-      foro.setUsuario();
-      foro.PantallaPrincipal();
-      
+     Foro foro=new Foro();
+     foro.setUsuario();
+     foro.PantallaPrincipal();
+     
       
             
     }

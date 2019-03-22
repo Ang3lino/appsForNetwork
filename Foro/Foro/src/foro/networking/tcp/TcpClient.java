@@ -20,9 +20,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Map.Entry;
-import java.util.Set;
+import java.util.Observable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,7 +28,7 @@ import java.util.logging.Logger;
  *
  * @author Angel Lopez Manriquez
  */
-public class TcpClient {
+public class TcpClient extends Observable{
     private Socket socket;
     private ObjectOutputStream oos;   
     private ObjectInputStream ois; 
@@ -56,31 +54,6 @@ public class TcpClient {
             } 
         }
     }
-    
-    public void sendComment(int postId, String nick, String comment) {
-		Pack p = new Pack(MyState.COMMENT);
-		p.setNick(nick);
-		p.setComment(comment);
-		p.setPostId(postId);
-		try {
-			oos.writeObject(p);
-		} catch (IOException ex) {
-			Logger.getLogger(TcpClient.class.getName()).log(Level.SEVERE, null, ex);
-		}
-    }
-	
-	public ArrayList<Pack> getComments(final int postId)  {
-		Pack p = new Pack(MyState.GET_COMMENTS);
-		try {
-			oos.writeObject(p);
-			return (ArrayList< Pack >) ois.readObject();
-		} catch (IOException ex) {
-			Logger.getLogger(TcpClient.class.getName()).log(Level.SEVERE, null, ex);
-		} catch (ClassNotFoundException ex) {
-			Logger.getLogger(TcpClient.class.getName()).log(Level.SEVERE, null, ex);
-		} 
-		return null; // something wrong happened
-	}
 
     public ArrayList<Pack> getPostsByKeyword(String keyword) {
         Pack pack = new Pack(MyState.SEARCH);
@@ -141,6 +114,14 @@ public class TcpClient {
             Pack pack = new Pack(MyState.LOG_IN);
             oos.writeObject(pack); // request the list port to the server
             list = (ArrayList<Pack>) ois.readObject(); // response
+            
+            this.setChanged();
+            this.notifyObservers(list);
+            this.clearChanged();
+           
+           // oos.close();
+         //  closeSocket();
+            
         } catch (IOException | ClassNotFoundException e) { 
             e.printStackTrace(); 
         } finally { 
