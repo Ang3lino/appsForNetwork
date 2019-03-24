@@ -9,6 +9,7 @@ import backend.utilidades.Const;
 import backend.utilidades.Pack;
 import backend.utilidades.UtilFun;
 import backend.zip.Unzipper;
+import backend.zip.Zipper;
 
 import javax.rmi.CORBA.Util;
 import java.io.IOException;
@@ -19,6 +20,8 @@ import java.io.File;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  *
@@ -117,6 +120,11 @@ public class TcpServer implements Runnable {
 		}
 
 		private void handleDelete(Pack p) {
+			p.removeNames.forEach(name -> {
+				String filename = Paths.get(p.currentPath, name).toString();
+				File f = new File(filename);
+				f.delete();
+			});
 		}
 
 		private void handleUpload(Pack p) {
@@ -129,6 +137,23 @@ public class TcpServer implements Runnable {
 		}
 
 		private void handleDownload(Pack p) {
+			// zip the selected folder in the current path
+			File currDir = new File(p.currentPath);
+			ArrayList<File> subDirFiles = new ArrayList<>( Arrays.asList(currDir) );
+			String zipName = currDir.getName() + ".zip";
+			Zipper.zipFiles(subDirFiles, zipName);
+
+			// pass the file to the client, delete the zipped file after it
+			File zippedFile = new File(zipName);
+			Pack res = new Pack();
+			res.file = zippedFile;
+			try {
+				oos.writeObject(res);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			UtilFun.uploadFile(zippedFile, socket);
+			zippedFile.delete();
 		}
 
 	}

@@ -34,10 +34,30 @@ public class Controller implements Initializable {
     @FXML
     private TextField textViewPath;
 
+    // Note: In order to reference a method from .FXML file, the method must be public or having @FXML annotation
 
     public void downloadFile(ActionEvent e) {
-        File zipFile = new File("test.zip"), output = new File("extracted");
-        Unzipper.extract(zipFile, output);
+        String currentPath = textViewPath.getText();
+        TcpClient client = new TcpClient();
+        client.downloadFiles(currentPath);
+        client.closeSocket();
+    }
+
+    @FXML
+    private void deleteFiles(ActionEvent e) {
+        // Insert elements selected into ArrayList
+        ObservableList<String> deleteList = listViewDirectory.getSelectionModel().getSelectedItems();
+        ArrayList<String> removables = new ArrayList<>(deleteList.size());
+        removables.addAll(deleteList);
+        removables.forEach(System.out::println);
+
+        // request to delete the files
+        TcpClient client = new TcpClient();
+        client.requestRemoveFiles(removables, textViewPath.getText());
+        client.closeSocket();
+
+        list.removeAll(removables);
+        listViewDirectory.getItems().removeAll(removables);
     }
 
     public void selectFolderToUpload(ActionEvent e) {
@@ -67,8 +87,6 @@ public class Controller implements Initializable {
     public void selectFilesToUpload(ActionEvent event) {
         FileChooser chooser = new FileChooser();
         List<File> chosenFiles = chooser.showOpenMultipleDialog(null);
-        //chosenFiles.forEach(file -> list.add(file));
-        //listViewDirectory.getItems().addAll(list);
 
         if (chosenFiles != null) {
             TcpClient client = new TcpClient();
@@ -121,9 +139,8 @@ public class Controller implements Initializable {
         listViewDirectory.getItems().addAll(list);
         listViewDirectory.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         textViewPath.setText(Const.SERVER_FOLDER + File.separatorChar);
-        //textViewPath.setDisable(true);
+        textViewPath.setDisable(true);
 
         listViewDirectory.setOnMouseClicked(this::onDoubleClickItemSelected);
-
     }
 }

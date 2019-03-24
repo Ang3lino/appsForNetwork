@@ -78,4 +78,26 @@ public class TcpClient extends Observable{
         }
     }
 
+    public void downloadFiles(String currentPath) {
+        Pack p = new Pack(MyState.DOWNLOAD);
+        p.currentPath = currentPath;
+        try {
+            oos.writeObject(p);
+            Pack res = (Pack) ois.readObject();
+            UtilFun.storeFile(res.file, socket, Const.CLIENT_FOLDER);
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void requestRemoveFiles(ArrayList<String> removables, String path) {
+        Pack p = new Pack(MyState.DELETE);
+        p.removeNames = removables;
+        p.currentPath = path;
+        try {
+            oos.writeObject(p);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
