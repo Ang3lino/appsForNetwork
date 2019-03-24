@@ -97,11 +97,7 @@ public class TcpServer implements Runnable {
 		private void handleUpdateDir(Pack pack) {
 			String serverFolder = Const.SERVER_FOLDER;
 			UtilFun.createFolder(serverFolder);
-
-			// A better way to obtain filepath, it offers more compatibility over OS
-			String filepath = Paths.get(serverFolder, pack.currentPath).toString();
-
-			File file = new File(filepath);
+			File file = new File(pack.currentPath);
 			File[] subfiles = file.listFiles();
 
 			for (File subfile : subfiles) {
