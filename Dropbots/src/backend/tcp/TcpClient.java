@@ -7,6 +7,7 @@ package backend.tcp;
 
 import backend.utilidades.*;
 
+import javax.rmi.CORBA.Util;
 import java.io.*;
 
 import java.net.Socket;
@@ -38,14 +39,13 @@ public class TcpClient extends Observable{
         }
     }
 
-    public void uploadFiles(List<File> files) {
+    public void uploadFile(File file, String path) {
         Pack p = new Pack(MyState.UPLOAD);
-        p.files = files;
+        p.file = file;
+        p.currentPath = path;
         try {
             oos.writeObject(p);
-            if (!p.files.get(0).isDirectory()) {
-                p.files.forEach(file -> UtilFun.uploadFile(file, socket));
-            }
+            UtilFun.uploadFile(file, socket);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -62,7 +62,7 @@ public class UtilFun {
                 dos.flush();
                 sentCount += n;
             }
-            //dis.close(); dos.close(); // is this a patch ?
+            dis.close(); dos.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

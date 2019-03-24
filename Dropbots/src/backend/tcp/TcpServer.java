@@ -8,7 +8,9 @@ package backend.tcp;
 import backend.utilidades.Const;
 import backend.utilidades.Pack;
 import backend.utilidades.UtilFun;
+import backend.zip.Unzipper;
 
+import javax.rmi.CORBA.Util;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -122,10 +124,12 @@ public class TcpServer implements Runnable {
 		}
 
 		private void handleUpload(Pack p) {
-			if (!p.files.get(0).isDirectory()) {
-				// TODO remove Const.SERVER_FOLDER
-				p.files.forEach(file -> UtilFun.storeFile(file, socket, Const.SERVER_FOLDER));
-			}
+			UtilFun.storeFile(p.file, socket, p.currentPath);
+
+			String zipPath = Paths.get(p.currentPath, p.file.getName()).toString();
+			File zipFile = new File(zipPath), outputFile = new File(p.currentPath);
+			Unzipper.extract(zipFile, outputFile);
+			zipFile.delete();
 		}
 
 		private void handleDownload(Pack p) {

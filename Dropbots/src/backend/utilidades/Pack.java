@@ -21,6 +21,7 @@ public class Pack implements Serializable {
 
     public String currentPath;
     public List<File> files;
+    public File file;
 
     public Pack(MyState state) { this.state = state; }
 
