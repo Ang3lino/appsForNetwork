@@ -49,49 +49,52 @@ public class UtilFun {
         return is.readObject();
     }
 
-    public static void uploadFile(File file, Socket socket) 
-            throws FileNotFoundException, IOException {
-        String name = file.getName();
-        DataInputStream dis = new DataInputStream(new FileInputStream(name));
-        DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+    private static void writeFileThroughStream(
+            DataInputStream dis, DataOutputStream dos, File file) {
+        try {
+            // TODO this segment of code is the same than storeFile
+            byte[] buff = new byte[Const.MAX_TCP_LENGTH];
+            long sentCount = 0, len = file.length();
 
-        byte[] b = new byte[Const.MAX_TCP_LENGTH];
-        long len = file.length();
-        long sentCount = 0;
-        while (sentCount < len) {
-            int n = dis.read(b);
-            dos.write(b, 0, n);
-            dos.flush();
-            sentCount += n;
+            while (sentCount < len) {
+                int n = dis.read(buff);
+                dos.write(buff, 0, n);
+                dos.flush();
+                sentCount += n;
+            }
+            //dis.close(); dos.close(); // is this a patch ?
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        dis.close();
-        dos.close();
     }
 
-    public static boolean storeFile(File file, Socket socket, String folder) 
-            throws FileNotFoundException, IOException {
-        if ( !createFolder(folder) ) return false;
-        
-        // A better way to obtain filepath, it offers more compatibility over OS
-        String filepath = Paths.get(folder, file.getName()).toString();
-        // String filepath = folder + file.getName();
-        DataInputStream dis = new DataInputStream(socket.getInputStream());
-        DataOutputStream fos = new DataOutputStream( 
-                new FileOutputStream(filepath) );
-        // new FileOutputStream("img/"+file.getName()) );
+    public static void uploadFile(File file, Socket socket) {
+        try {
+            String filepath = file.getAbsolutePath();
+            DataInputStream dis = new DataInputStream(new FileInputStream(filepath));
+            DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
 
-        long size = file.length();
-        long count = 0;
-        byte[] buff = new byte[Const.MAX_TCP_LENGTH];
-        while (count < size) {
-            int n = dis.read(buff);
-            fos.write(buff, 0, n);
-            fos.flush();
-            count += n;
+            writeFileThroughStream(dis, dos, file);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        fos.close();
-        dis.close();
+    }
 
-	return true;
+    public static boolean storeFile(File file, Socket socket, String folder) {
+        try {
+            if ( !createFolder(folder) ) return false;
+
+            // A better way to obtain filepath, it offers more compatibility over OS
+            String filepath = Paths.get(folder, file.getName()).toString();
+            DataInputStream dis = new DataInputStream(socket.getInputStream());
+            DataOutputStream dos = new DataOutputStream( new FileOutputStream(filepath) );
+
+            writeFileThroughStream(dis, dos, file);
+
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

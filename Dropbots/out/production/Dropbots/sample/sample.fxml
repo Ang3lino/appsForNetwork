@@ -9,7 +9,7 @@
 
 <BorderPane prefHeight="321.0" prefWidth="464.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
    <bottom>
-        <TextField prefWidth="315.0" BorderPane.alignment="CENTER">
+        <TextField fx:id="textViewPath" prefWidth="315.0" BorderPane.alignment="CENTER">
          <BorderPane.margin>
             <Insets bottom="5.0" top="5.0" />
          </BorderPane.margin></TextField>

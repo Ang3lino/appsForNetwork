@@ -12,6 +12,7 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,6 +33,19 @@ public class TcpClient extends Observable{
 
             oos = new ObjectOutputStream(socket.getOutputStream());
             ois = new ObjectInputStream(socket.getInputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void uploadFiles(List<File> files) {
+        Pack p = new Pack(MyState.UPLOAD);
+        p.files = files;
+        try {
+            oos.writeObject(p);
+            if (!p.files.get(0).isDirectory()) {
+                p.files.forEach(file -> UtilFun.uploadFile(file, socket));
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

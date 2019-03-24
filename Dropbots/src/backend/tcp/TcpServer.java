@@ -86,7 +86,7 @@ public class TcpServer implements Runnable {
 						handleUpload(pack);
 						break;
 				}
-				socket.close();
+				//socket.close();
 			} catch (IOException | ClassNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -115,16 +115,20 @@ public class TcpServer implements Runnable {
 			}
 		}
 
-		private void handleMove(Pack pack) {
+		private void handleMove(Pack p) {
 		}
 
-		private void handleDelete(Pack pack) {
+		private void handleDelete(Pack p) {
 		}
 
-		private void handleUpload(Pack pack) {
+		private void handleUpload(Pack p) {
+			if (!p.files.get(0).isDirectory()) {
+				// TODO remove Const.SERVER_FOLDER
+				p.files.forEach(file -> UtilFun.storeFile(file, socket, Const.SERVER_FOLDER));
+			}
 		}
 
-		private void handleDownload(Pack pack) {
+		private void handleDownload(Pack p) {
 		}
 
 	}

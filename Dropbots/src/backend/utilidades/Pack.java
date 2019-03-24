@@ -8,6 +8,7 @@ package backend.utilidades;
 import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.util.List;
 
 /**
  *
@@ -19,6 +20,7 @@ public class Pack implements Serializable {
     private MyState state;
 
     public String currentPath;
+    public List<File> files;
 
     public Pack(MyState state) { this.state = state; }
 
