@@ -53,7 +53,8 @@ CREATE PROCEDURE get_comments(IN p_id_post INT)
 BEGIN 
 	SELECT c.nick, c.comment
 	FROM comment_post c, post p
-	WHERE c.id_post = p.id ;
+	WHERE c.id_post = p.id 
+		AND p.id = p_id_post;
 END &
 DELIMITER ;
 -- call get_comments(1);
