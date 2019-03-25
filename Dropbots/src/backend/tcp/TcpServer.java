@@ -11,14 +11,16 @@ import backend.utilidades.UtilFun;
 import backend.zip.Unzipper;
 import backend.zip.Zipper;
 
-import javax.rmi.CORBA.Util;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 import java.io.File;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -116,11 +118,30 @@ public class TcpServer implements Runnable {
 			}
 		}
 
-		private void handleMove(Pack p) {
+		private void handleMove(Pack req) {
+			File root = new File(Const.SERVER_FOLDER);
+			try {
+				oos.writeObject(root);
+				File dst = (File) ois.readObject();
+
+				req.fileNames.forEach(file -> {
+					try {
+						Path srcPath = Paths.get(req.currentPath, file),
+								dstPath = Paths.get(dst.getPath(), file);
+						System.out.println(srcPath);
+						System.out.println(dstPath);
+						Files.move(srcPath, dstPath);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				});
+			} catch (IOException | ClassNotFoundException e) {
+				e.printStackTrace();
+			}
 		}
 
 		private void handleDelete(Pack p) {
-			p.removeNames.forEach(name -> {
+			p.fileNames.forEach(name -> {
 				String filename = Paths.get(p.currentPath, name).toString();
 				File f = new File(filename);
 				f.delete();

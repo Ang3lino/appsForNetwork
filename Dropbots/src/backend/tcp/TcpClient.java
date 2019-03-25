@@ -6,17 +6,13 @@
 package backend.tcp;
 
 import backend.utilidades.*;
+import javafx.stage.DirectoryChooser;
 
-import javax.rmi.CORBA.Util;
 import java.io.*;
 
 import java.net.Socket;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Observable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -92,12 +88,30 @@ public class TcpClient extends Observable{
 
     public void requestRemoveFiles(ArrayList<String> removables, String path) {
         Pack p = new Pack(MyState.DELETE);
-        p.removeNames = removables;
+        p.fileNames = removables;
         p.currentPath = path;
         try {
             oos.writeObject(p);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void requestMoveFiles(ArrayList<String> itemsToMove, String path) {
+        Pack req = new Pack(MyState.MOVE);
+        req.currentPath = path;
+        req.fileNames = itemsToMove;
+        try {
+            oos.writeObject(req);
+            File res = (File) ois.readObject();
+            DirectoryChooser chooser = new DirectoryChooser();
+            chooser.setInitialDirectory(res);
+            File destiny = chooser.showDialog(null);
+
+            oos.writeObject(destiny);
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
     }
 }

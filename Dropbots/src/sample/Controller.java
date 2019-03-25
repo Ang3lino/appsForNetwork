@@ -36,11 +36,27 @@ public class Controller implements Initializable {
 
     // Note: In order to reference a method from .FXML file, the method must be public or having @FXML annotation
 
+    @FXML
     public void downloadFile(ActionEvent e) {
         String currentPath = textViewPath.getText();
         TcpClient client = new TcpClient();
         client.downloadFiles(currentPath);
         client.closeSocket();
+    }
+
+    @FXML
+    private void moveFiles(ActionEvent e) {
+        // set elements to move into ArrayList
+        ObservableList<String> moveList = listViewDirectory.getSelectionModel().getSelectedItems();
+        ArrayList<String> itemsToMove = new ArrayList<>(moveList.size());
+        itemsToMove.addAll(moveList);
+
+        TcpClient client = new TcpClient();
+        client.requestMoveFiles(itemsToMove, textViewPath.getText());
+        client.closeSocket();
+
+        list.removeAll(itemsToMove);
+        listViewDirectory.getItems().removeAll(itemsToMove);
     }
 
     @FXML
@@ -104,7 +120,6 @@ public class Controller implements Initializable {
             zipped.delete();
         }
     }
-
 
     private void onDoubleClickItemSelected(MouseEvent click) {
         if (click.getClickCount() == 2) {

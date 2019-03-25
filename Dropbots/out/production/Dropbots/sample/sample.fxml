@@ -26,7 +26,7 @@
               <Button mnemonicParsing="false" onAction="#selectFolderToUpload" text="Subir folder" />
             <Button mnemonicParsing="false" onAction="#selectFilesToUpload" text="Subir archivos" />
               <Button mnemonicParsing="false" onAction="#downloadFile" text="Bajar archivos mostrados" />
-              <Button mnemonicParsing="false" text="Mover" />
+              <Button mnemonicParsing="false" onAction="#moveFiles" text="Mover" />
               <Button mnemonicParsing="false" onAction="#deleteFiles" text="Eliminar archivos seleccionados" />
         </items>
          <BorderPane.margin>

@@ -21,7 +21,7 @@ public class Pack implements Serializable {
     private MyState state;
 
     public String currentPath;
-    public ArrayList<String> removeNames;
+    public ArrayList<String> fileNames;
     public File file;
 
     public Pack(MyState state) { this.state = state; }
