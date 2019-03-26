@@ -52,7 +52,6 @@ public class UtilFun {
     private static void writeFileThroughStream(
             DataInputStream dis, DataOutputStream dos, File file) {
         try {
-            // TODO this segment of code is the same than storeFile
             byte[] buff = new byte[Const.MAX_TCP_LENGTH];
             long sentCount = 0, len = file.length();
 
@@ -61,6 +60,8 @@ public class UtilFun {
                 dos.write(buff, 0, n);
                 dos.flush();
                 sentCount += n;
+                System.out.printf("File: %s\nPercentage: %s\n",
+                        file.getName(), (sentCount * 100/ len));
             }
             dis.close(); dos.close();
         } catch (IOException e) {

@@ -13,11 +13,15 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -76,6 +80,25 @@ public class Controller implements Initializable {
         listViewDirectory.getItems().removeAll(removables);
     }
 
+    private void uploadList(ArrayList<File> files) {
+        // create a zip file
+        final String zipName = "tmp.zip";
+        Zipper.zipFiles(files, zipName);
+
+        // upload the file
+        TcpClient client = new TcpClient();
+        File zipped = new File(zipName);
+        client.uploadFile(zipped, textViewPath.getText());
+
+        // this should add non repeated elements
+        list.clear();
+        files.forEach(file -> list.add(file.getName()));
+        listViewDirectory.getItems().addAll(list);
+
+        zipped.delete();
+        client.closeSocket();
+    }
+
     public void selectFolderToUpload(ActionEvent e) {
         final DirectoryChooser chooser = new DirectoryChooser();
         final File chosenFile = chooser.showDialog(null);
@@ -84,19 +107,7 @@ public class Controller implements Initializable {
         if (chosenFile != null) {
             ArrayList<File> files = new ArrayList<>();
             files.add(chosenFile);
-            final String zipName = chosenFile.getName() + ".zip";
-            Zipper.zipFiles(files, zipName);
-
-            TcpClient client = new TcpClient();
-            File zipped = new File(zipName);
-            client.uploadFile(zipped, Const.SERVER_FOLDER);
-            zipped.delete();
-
-            list.clear();
-            list.add(chosenFile.getName());
-            listViewDirectory.getItems().addAll(list);
-
-            textViewPath.setText(Const.SERVER_FOLDER + File.separatorChar);
+            uploadList(files);
         }
     }
 
@@ -105,20 +116,39 @@ public class Controller implements Initializable {
         List<File> chosenFiles = chooser.showOpenMultipleDialog(null);
 
         if (chosenFiles != null) {
-            TcpClient client = new TcpClient();
             ArrayList<File> files = new ArrayList<>(chosenFiles.size());
             files.addAll(chosenFiles);
-            Zipper.zipFiles(files, "tmp.zip");
-            File zipped = new File("tmp.zip");
-            client.uploadFile(zipped, textViewPath.getText());
-
-            listViewDirectory.getItems().clear();
-            files.forEach(file -> list.add(file.getName()));
-            listViewDirectory.getItems().addAll(list);
-
-            client.closeSocket();
-            zipped.delete();
+            uploadList(files);
         }
+    }
+
+    // In this case listViewDirectory is the drop target.
+    @FXML
+    public void onDragOver(DragEvent event) {
+        if (event.getGestureSource() != listViewDirectory && event.getDragboard().hasFiles()) {
+            // allow for both copying and moving, whatever user chooses
+            event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+        }
+        event.consume();
+    }
+
+    @FXML
+    private void onDragDropped(DragEvent event) {
+        Dragboard db = event.getDragboard();
+        boolean success = false;
+        if (db.hasFiles()) {
+            List<File> filesDropped = db.getFiles();
+            success = true;
+
+            ArrayList<File> files = new ArrayList<>(filesDropped.size());
+            files.addAll(filesDropped);
+            uploadList(files);
+        }
+        /* let the source know whether the string was successfully
+         * transferred and used */
+        event.setDropCompleted(success);
+
+        event.consume();
     }
 
     private void onDoubleClickItemSelected(MouseEvent click) {
