@@ -18,6 +18,15 @@ public class Publicacion extends javax.swing.JDialog {
 private String mTitile;
 private String mCategory;
 private File img;
+private String mDescription;
+
+    public void setmDescription(String mDescription) {
+        this.mDescription = mDescription;
+    }
+
+    public String getmDescription() {
+        return mDescription;
+    }
 
     public void setmCategory(String mCategory) {
         this.mCategory = mCategory;
@@ -35,6 +44,16 @@ private File img;
         return mTitile;
     }
 
+    public void setImg(File img) {
+        this.img = img;
+    }
+
+    public File getImg() {
+        return img;
+    }
+    
+    
+
     @Override
     public String toString() {
        String toString="";     
@@ -50,6 +69,7 @@ private File img;
     public Publicacion(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+       
   
     }
 
@@ -179,6 +199,7 @@ private File img;
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         setmTitile(jTextField1.getText());
         setmCategory((String)jComboBox1.getSelectedItem());
+        setmDescription(jTextArea1.getText());
         this.setVisible(false);
     }//GEN-LAST:event_jButton1ActionPerformed
 

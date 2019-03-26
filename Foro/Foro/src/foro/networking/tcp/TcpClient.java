@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  *
  * @author Angel Lopez Manriquez
  */
-public class TcpClient extends Observable{
+public class TcpClient extends Observable {
     private Socket socket;
     private ObjectOutputStream oos;   
     private ObjectInputStream ois; 
@@ -62,6 +62,11 @@ public class TcpClient extends Observable{
         try {
             oos.writeObject(pack); // request
             matchables = (ArrayList<Pack>) ois.readObject();
+            
+            this.setChanged();
+            this.notifyObservers(matchables);
+            this.clearChanged();
+            
         } catch (IOException ex) {
             ex.printStackTrace();
         } finally{
@@ -97,8 +102,9 @@ public class TcpClient extends Observable{
             String filepath = Paths.get(Const.CLIENT_FOLDER, res.getImage().getName()).toString();
             pack.setFile(new File(filepath));
         }
-	System.out.println(pack);
-        return pack;
+	System.out.println("POST RECIBIDO DESDE EL CLIENTE"+pack.toString());
+        
+        return res;
     }
 
     /**
@@ -119,8 +125,8 @@ public class TcpClient extends Observable{
             this.notifyObservers(list);
             this.clearChanged();
            
-           // oos.close();
-         //  closeSocket();
+           oos.close();
+          closeSocket();
             
         } catch (IOException | ClassNotFoundException e) { 
             e.printStackTrace(); 
@@ -128,5 +134,32 @@ public class TcpClient extends Observable{
             return list; 
         }
     }
+    
+      public void sendComment(int postId, String nick, String comment) {
+		Pack p = new Pack(MyState.COMMENT);
+		p.setNick(nick);
+		p.setmComment(comment);
+		p.setPostId(postId);
+		try {
+			oos.writeObject(p);
+		} catch (IOException ex) {
+			Logger.getLogger(TcpClient.class.getName()).log(Level.SEVERE, null, ex);
+		}
+    }
+	
+	public ArrayList<Pack> getComments(final int postId)  {
+		Pack p = new Pack(MyState.GET_COMMENTS);
+                p.setPostId(postId);//TE falto agregar esta linea pinche angel jaja
+		try {
+			oos.writeObject(p);
+			return (ArrayList< Pack >) ois.readObject();
+		} catch (IOException ex) {
+			Logger.getLogger(TcpClient.class.getName()).log(Level.SEVERE, null, ex);
+		} catch (ClassNotFoundException ex) {
+			Logger.getLogger(TcpClient.class.getName()).log(Level.SEVERE, null, ex);
+		} 
+		return null; // something wrong happened
+	}
+
 
 }

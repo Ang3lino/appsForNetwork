@@ -24,47 +24,13 @@ CREATE TABLE user_post (
 	PRIMARY KEY (nick, id_post)
 );
 
-CREATE TABLE comment_post (
-	id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-	nick VARCHAR(32) NOT NULL,
-	comment VARCHAR(512),
-	id_post INT NOT NULL,
-	FOREIGN KEY (id_post) REFERENCES post(id) 
-			ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-DELIMITER &
-CREATE PROCEDURE add_comment(
-	IN p_id_post INT, 
-	IN p_nick VARCHAR(32),
-	IN p_comment VARCHAR(512)
-) 
-BEGIN 
-	INSERT INTO comment_post(nick, comment, id_post) 
-	VALUES (p_nick, p_comment, p_id_post);
-END &
-DELIMITER ;
--- call add_comment(1, "ang3l", "Terrible, oremos");
--- call add_comment(1, "davis", "Impactante");
--- call add_comment(1, "pain", "Nani?");
-
-DELIMITER &
-CREATE PROCEDURE get_comments(IN p_id_post INT) 
-BEGIN 
-	SELECT c.nick, c.comment
-	FROM comment_post c, post p
-	WHERE c.id_post = p.id 
-		AND p.id = p_id_post;
-END &
-DELIMITER ;
--- call get_comments(1);
-
+-- procedures =================================================================
 
 DELIMITER &
 CREATE PROCEDURE get_list_post() 
 BEGIN
 
-	SELECT 	p.id, p.title, u.post_date
+	SELECT 	p.id, p.title, u.post_date 
 	FROM post p, user_post u 
 	WHERE p.id = u.id_post
 	ORDER BY 1, 2, 3;
@@ -85,7 +51,6 @@ END &
 DELIMITER ; -- end definition =================================================
 
 --SELECT 	p.title, p.description, p.img_url, u.nick, u.post_date, u.category
-
 DELIMITER &
 CREATE PROCEDURE find_by_keyword(IN p_key VARCHAR(64)) 
 BEGIN

@@ -51,7 +51,7 @@ public class UtilFun {
 
     public static void uploadFile(File file, Socket socket) 
             throws FileNotFoundException, IOException {
-        String name = file.getName();
+        String name = file.getAbsolutePath();
         DataInputStream dis = new DataInputStream(new FileInputStream(name));
         DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
 

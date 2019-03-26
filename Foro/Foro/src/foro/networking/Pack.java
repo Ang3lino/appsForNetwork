@@ -16,7 +16,7 @@ public class Pack implements Serializable {
     // establecer el valor en caso de implementar la clase Serializable
     public static final long serialVersionUID = 1L;
 
-    private String mNick, mTopic, mTitle, mDescription, mFileUrl, mDate, mKeyword;
+    private String mNick, mTopic, mTitle, mDescription, mFileUrl, mDate, mKeyword,mComment;
     private File mImg; // guardara la imagen
    
     private int mPostId; // id de la relacion post de la base de datos
@@ -25,14 +25,17 @@ public class Pack implements Serializable {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-
-        if (mNick != null) builder.append(String.format("\nNick: %s\n", mNick));
+        if (mTitle != null) builder.append(String.format(" %s\n", mTitle));
+        if (mNick != null) builder.append(String.format(" Publicado por: %s\n", mNick));
         if (mTopic != null) builder.append(String.format("Topic: %s\n", mTopic));
-        if (mTitle != null) builder.append(String.format("Title: %s\n", mTitle));
+        if (mDate != null) builder.append(String.format("Date: %s\n", mDate));
+       
+        
+        
         if (mDescription != null) builder.append(String.format("Description: %s\n", 
                 mDescription));
         if (mFileUrl != null) builder.append(String.format("File Url: %s\n", mFileUrl));
-        if (mDate != null) builder.append(String.format("Date: %s\n", mDate));
+        
         if (mKeyword != null) builder.append(String.format("Keyword: %s\n", mKeyword));
 
         if (mImg != null) builder.append(String.format("img as file: %s\n", mImg));
@@ -41,10 +44,19 @@ public class Pack implements Serializable {
 
         return builder.toString();
     }
+    
+    public String listaPost(){
+    StringBuilder builder = new StringBuilder();
+    if (mTitle != null) builder.append(String.format(" %s\n", mTitle));
+    if (mTopic != null) builder.append(String.format("  Categoria: %s\n", mTopic));
+    if (mDate != null) builder.append(String.format("  Fecha: %s\n", mDate));
+    if (mNick != null) builder.append(String.format("  Publicado por: %s\n", mNick));
+    return builder.toString();
+    }
 
-    public Pack() { }
+    public Pack() { mComment="";}
 
-    public Pack(MyState state) { mState = state; }
+    public Pack(MyState state) { mState = state;  mComment="";}
 
     public void addPost(String nick, String topic, String title, 
                 String description) {
@@ -72,7 +84,21 @@ public class Pack implements Serializable {
     public void setTitle(String title) { mTitle = title; }
     public void setDate(String date) { mDate = date; }
     public void setFile(File file) { mImg = file; }
+    public void setNick(String string) {  mNick=string; }
 
+    public void setmDate(String mDate) {
+        this.mDate = mDate;
+    }
+
+    public void setmComment(String mComment) {
+        this.mComment +="\n\n\n"+ mComment;
+    }
+
+    public void setmDescription(String mDescription) {     this.mDescription = mDescription; }
+    
+    
+    
+    public void setTopic(String topic){ mTopic=topic;}
     // getters =================================================================
     public MyState getState() { return mState; }
 
@@ -82,13 +108,18 @@ public class Pack implements Serializable {
     public String getTitle() { return mTitle; }
     public String getDescription() { return mDescription; }
     public String getFileUrl() { return mFileUrl; }
+    public String getmComment() {
+        return mComment;
+    }
 
+    public String getmDate() {
+        return mDate;
+    }
+   
     public File getImage () { return mImg; }
 
     public int getPostId() { return mPostId; }
 
-    public void setNick(String string) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+ 
 
 }

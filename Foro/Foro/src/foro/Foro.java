@@ -5,6 +5,7 @@
  */
 package foro;
 
+import foro.networking.tcp.TcpClient;
 import foro.networking.tcp.TcpServer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -29,10 +30,10 @@ public void setUsuario(){
          login.setVisible(true);
         }
         
-        Usuario=login.getUsuario();  
-        Usuario="david";
+        Usuario=login.getUsuario(); 
+        login.setVisible(false);
         pub=new Publicaciones(Usuario);
-     
+       
          System.out.println("El usuario es: "+Usuario);
       
       
@@ -46,7 +47,7 @@ public void PantallaPrincipal(){
 
     public static void main(String[] args) {
      Foro foro=new Foro();
-     foro.setUsuario();
+     foro.setUsuario();    
      foro.PantallaPrincipal();
      
       

@@ -6,10 +6,8 @@
 package database;
 
 import com.mysql.jdbc.Connection;
-import foro.networking.MyState;
 import foro.networking.Pack;
 import foro.networking.UtilFun;
-import foro.networking.tcp.TcpClient;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -19,14 +17,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  *
- * @author Angel Lopez Manriquez
+ * @author Sigma
  */
 public class DBHelper {
 
@@ -60,14 +56,18 @@ public class DBHelper {
         System.out.println("List Post method called "); 
         Connection conn = getConnection();
         Statement statement = conn.createStatement();
-        ResultSet set = statement.executeQuery("call get_list_post()");
+        ResultSet set = statement.executeQuery("call get_list_post3()");
 
         ArrayList<Pack> list = new ArrayList<>();
         while (set.next()) {
             Pack pack = new Pack();
+            pack.setPostId(set.getInt("id"));
             pack.setTitle(set.getString("title"));
             pack.setDate(set.getString("post_date"));
-            pack.setPostId(set.getInt("id"));
+            pack.setNick(set.getString("nick"));
+            pack.setTopic(set.getString("category"));
+         //   pack.setmComment(set.getString("comment"));
+           
             list.add(pack);
         }
 
@@ -77,9 +77,48 @@ public class DBHelper {
 
         return list;
     }
+    
+    public static ArrayList<Pack> getComments(final int postId) 
+			throws SQLException  {
 
-    public static ArrayList<Pack> findByKeyword(String keyword) 
-			throws SQLException, IOException {
+		Connection conn = getConnection();
+        Statement statement = conn.createStatement();
+        String query = String.format("call get_comments(%d)", postId); 
+        System.out.println(query); 
+        ResultSet set = statement.executeQuery(query);
+
+        ArrayList< Pack > comments = new ArrayList<>();
+        while (set.next()) {
+            Pack comment = new Pack();
+			comment.setNick(set.getString("nick"));
+			comment.setmComment(set.getString("comment"));
+			comments.add(comment);
+	    }
+
+        set.close();
+
+        comments.forEach(p -> { System.out.println(p); } );
+		
+		return comments;
+	}
+    
+    public static void appendComment(Pack pack) {
+		try {
+			System.out.println("appendComment method called ");
+			Connection conn = getConnection();
+			Statement statement = conn.createStatement();
+			String nick = pack.getNick(), comment = pack.getmComment();
+			int postId = pack.getPostId();
+			String query = String.format(
+					"call add_comment(%d, \"%s\", \"%s\")", postId, nick, comment);
+			System.out.println(query);
+			statement.executeQuery(query);
+		} catch (SQLException ex) {
+			Logger.getLogger(DBHelper.class.getName()).log(Level.SEVERE, null, ex);
+		}
+    }
+
+    public static ArrayList<Pack> findByKeyword(String keyword) throws SQLException, IOException {
         System.out.println("findBykeyword method called "); 
 
         Connection conn = getConnection();
@@ -102,46 +141,6 @@ public class DBHelper {
         list.forEach(p -> { System.out.println(p); } );
 
         return list;
-    }
-	
-	public static ArrayList<Pack> getComments(final int postId) 
-			throws SQLException  {
-
-		Connection conn = getConnection();
-        Statement statement = conn.createStatement();
-        String query = String.format("call get_comments(%d)", postId); 
-        System.out.println(query); 
-        ResultSet set = statement.executeQuery(query);
-
-        ArrayList< Pack > comments = new ArrayList<>();
-        while (set.next()) {
-            Pack comment = new Pack();
-			comment.setNick(set.getString("nick"));
-			comment.setComment(set.getString("comment"));
-			comments.add(comment);
-	    }
-
-        set.close();
-
-        comments.forEach(p -> { System.out.println(p); } );
-		
-		return comments;
-	}
-    
-    public static void appendComment(Pack pack) {
-		try {
-			System.out.println("appendComment method called ");
-			Connection conn = getConnection();
-			Statement statement = conn.createStatement();
-			String nick = pack.getNick(), comment = pack.getComment();
-			int postId = pack.getPostId();
-			String query = String.format(
-					"call add_comment(%d, \"%s\", \"%s\")", postId, nick, comment);
-			System.out.println(query);
-			statement.executeQuery(query);
-		} catch (SQLException ex) {
-			Logger.getLogger(DBHelper.class.getName()).log(Level.SEVERE, null, ex);
-		}
     }
 
     public static void appendPost(Pack pack) throws SQLException, IOException {

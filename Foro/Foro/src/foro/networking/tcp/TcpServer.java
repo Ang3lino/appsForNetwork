@@ -91,6 +91,10 @@ public class TcpServer extends Observable implements Runnable {
 					case DOWNLOAD:
 						processDownload(pack);
 						break;      
+                                         case COMMENT:
+						processComment(pack); break;
+					case GET_COMMENTS:
+						buildComments(pack); break;
 				}
                          socket.close();
 			} catch (IOException | ClassNotFoundException e) {
@@ -98,6 +102,22 @@ public class TcpServer extends Observable implements Runnable {
 			}
 		}
 
+                
+                
+                public void buildComments(Pack p) {
+			try {
+				ArrayList<Pack> packs = DBHelper.getComments(p.getPostId());
+				oos.writeObject(packs);
+			} catch (IOException ex) {
+				Logger.getLogger(TcpServer.class.getName()).log(Level.SEVERE, null, ex);
+			} catch (SQLException ex) {
+				Logger.getLogger(TcpServer.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		}
+		
+		public void processComment(Pack p) {
+                            DBHelper.appendComment(p);
+		}
 		/**
 		 * Pass a list of Pack, these will have id, title and post_date
 		 */

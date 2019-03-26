@@ -51,21 +51,19 @@ public class Test {
 
         packs = client.getPostsByKeyword("Acuchillado");
         packs.forEach(p -> { System.out.println(p); } );
-		client.closeSocket();
+	client.closeSocket();
     }
 
     public static void downloadFile() throws IOException, ClassNotFoundException {
         TcpClient client = new TcpClient();
-		// Download a file given an id
+	// Download a file given an id
         Pack pack = client.downloadPack(8); 
-		// The file where the file is saved is in pack.getImage() which is a file
-		File file = pack.getImage();
-		client.closeSocket();
+	// The file where the file is saved is in pack.getImage() which is a file
+	File file = pack.getImage();
+	client.closeSocket();
     }
     
     public static void main(String args[]) throws IOException, ClassNotFoundException {
-		search();
-        downloadFile();
-	//uploadFile();
+        downloadFile(); 
     }
 }

@@ -5,6 +5,7 @@
  */
 package foro;
 
+import foro.networking.MyState;
 import foro.networking.Pack;
 import foro.networking.tcp.TcpClient;
 import foro.networking.tcp.TcpServer;
@@ -15,9 +16,12 @@ import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -32,6 +36,7 @@ public class Publicaciones extends javax.swing.JFrame implements Observer{
 private String FechaBusqueda; 
 private ArrayList<JButton> publications;
 private ArrayList<Boolean> BotonOprimido;
+private JTextArea comentarios;
 private ArrayList<JTextArea> cuerpo;
 private String description;
 private int indice,indice2;
@@ -40,9 +45,8 @@ private Login login;
 private String Titulo;
 private boolean LabelPrincipal;
 private TcpClient cliente;
-private TcpServer servidor;
 private ArrayList <Pack> posts;
-
+private Pack post_actual;
 
     public void setLogin(Login login) {
         this.login = login;
@@ -61,20 +65,21 @@ private ArrayList <Pack> posts;
         publications=new ArrayList<>();
         BotonOprimido=new ArrayList<>();
         cuerpo=new ArrayList <>();
+        comentarios=new JTextArea();
         LabelPrincipal=false;
         this.Usuario=Usuario;
         jLabelUsuario.setText("Usuario: @"+Usuario);
-        
+        post_actual=new Pack();
         
         cliente=new TcpClient();
         cliente.addObserver(this);
-       
-       
+        posts=cliente.getListPost();
+        
   
          
     }
     
-    public void addBotton(String contenido){
+    public void addBotton(String contenido, int idPost, Pack post){
        JButton button=new JButton("JButton"+indice);
        button.setText(contenido);
        button.setForeground(Color.red);
@@ -86,9 +91,9 @@ private ArrayList <Pack> posts;
        
        jPanelPublicaciones.add(button);
        publications.add(button);  
-       BotonOprimido.add(false);
+     //  BotonOprimido.add(false);
        jPanelPublicaciones.updateUI();
-       System.out.println(button.getName());  
+    
        ///Mostramos el cuerpo del Post
        button.addActionListener((ActionEvent e) -> {
            jPanelArticulo.removeAll();   
@@ -100,14 +105,54 @@ private ArrayList <Pack> posts;
            label.setFont(fuente2);
            label.setBackground(new Color(255,255,204));
            jPanelArticulo.add(label);
-           jPanelArticulo.updateUI();
+           
+           JTextArea descripcion_post=new JTextArea("Descripcion");
+           Font fuente3=new Font("Monospaced", Font.BOLD, 16);
+           descripcion_post.setFont(fuente3);
            
           
+           try {
+               TcpClient cliente=new TcpClient();
+               TcpClient cliente2=new TcpClient();
+               post_actual=cliente.downloadPack(idPost);
+               post_actual.setPostId(idPost);
+               System.out.println("poust actual: "+post_actual.toString());
+               descripcion_post.setText(post_actual.getDescription());
+               System.out.println("Descripcion :"+ post_actual.getDescription());
+               jPanelArticulo.add(descripcion_post);
+               
+               if(post_actual.getFileUrl()!=null){
+               JLabel imagen=new JLabel();
+               String path=post_actual.getImage().getAbsolutePath();
+               imagen.setIcon(new ImageIcon(path));
+               jPanelArticulo.add(imagen);
+               }
+               
+               
+               ArrayList<Pack> comentarios=cliente2.getComments(idPost);
+               System.out.println("get_comments("+idPost+")"+ "SIZE comentarios pack "+comentarios.size());
+               JTextArea comments=new JTextArea();
+               for(int i=0;i<comentarios.size();i++){
+                   
+                comments.append("\n\n"+comentarios.get(i).getmComment());
+                   System.out.println(idPost+" "+comentarios.get(i).getmComment());
+               }
+               
+              jPanelArticulo.add(comments);
+              
+               
+           } catch (IOException ex) {
+               Logger.getLogger(Publicaciones.class.getName()).log(Level.SEVERE, null, ex);
+           } catch (ClassNotFoundException ex) {
+               Logger.getLogger(Publicaciones.class.getName()).log(Level.SEVERE, null, ex);
+           }
+           
+           jPanelArticulo.updateUI();
+                    
        });
+       
        indice++;
- 
-    
-    
+     
     }
     
 
@@ -123,7 +168,7 @@ private ArrayList <Pack> posts;
 
 public void setFecha() {
    FechaBusqueda=(String)jComboBoxyear.getSelectedItem()+"-"+(String)jComboBoxMes.getSelectedItem()+"-"+(String)jComboBoxDia.getSelectedItem();
-    System.out.println(FechaBusqueda);
+   
 }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -141,7 +186,6 @@ public void setFecha() {
         jTextArea1 = new javax.swing.JTextArea();
         jLabelNameUsuario = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
-        jButtonAddImage = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         jPanelPublicaciones = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
@@ -182,13 +226,6 @@ public void setFecha() {
         jLabel4.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
         jLabel4.setText("PUBLICACIONES:");
 
-        jButtonAddImage.setText("Agregar Imagen");
-        jButtonAddImage.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonAddImageActionPerformed(evt);
-            }
-        });
-
         jPanelPublicaciones.setBackground(new java.awt.Color(255, 255, 204));
         jPanelPublicaciones.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         jPanelPublicaciones.setLayout(new java.awt.GridLayout(0, 1));
@@ -217,7 +254,7 @@ jComboBoxMes.addActionListener(new java.awt.event.ActionListener() {
     }
     });
 
-    jComboBoxyear.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "2018", "2017", "2016", "2015" }));
+    jComboBoxyear.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] {"2019", "2018", "2017", "2016", "2015" }));
     jComboBoxyear.addActionListener(new java.awt.event.ActionListener() {
         public void actionPerformed(java.awt.event.ActionEvent evt) {
             jComboBoxyearActionPerformed(evt);
@@ -373,8 +410,6 @@ jComboBoxMes.addActionListener(new java.awt.event.ActionListener() {
                 .addComponent(jScrollPane1)
                 .addGroup(jPanel1Layout.createSequentialGroup()
                     .addComponent(jButtonAddComentario)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                    .addComponent(jButtonAddImage, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGap(0, 0, Short.MAX_VALUE))
                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
             .addContainerGap())
@@ -401,9 +436,7 @@ jComboBoxMes.addActionListener(new java.awt.event.ActionListener() {
                     .addGap(1, 1, 1)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jButtonAddComentario)
-                        .addComponent(jButtonAddImage)))
+                    .addComponent(jButtonAddComentario))
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 556, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addGap(246, 246, 246))
     );
@@ -422,7 +455,7 @@ jComboBoxMes.addActionListener(new java.awt.event.ActionListener() {
         layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
         .addComponent(jScrollBar2, javax.swing.GroupLayout.DEFAULT_SIZE, 754, Short.MAX_VALUE)
         .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 743, Short.MAX_VALUE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 748, Short.MAX_VALUE)
             .addContainerGap())
     );
 
@@ -434,17 +467,36 @@ jComboBoxMes.addActionListener(new java.awt.event.ActionListener() {
     }//GEN-LAST:event_jComboBoxyearActionPerformed
 
     private void jButtonFechaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFechaActionPerformed
-       if (FechaBusqueda==null)
-           JOptionPane.showMessageDialog(null,"Introduce una Fecha de Busqueda");
-       else
-           setFecha();
+      setFecha();
+        
+        if (FechaBusqueda==null){
+          JOptionPane.showMessageDialog(null,"Introduce una Fecha de Busqueda");
+        }
+         
+        else{
+      
+        TcpClient cliente=new TcpClient();
+        cliente.addObserver(this);
+        posts=cliente.getPostsByKeyword(FechaBusqueda); 
+       
+        
+        }
+          
+       
+   
+    
           
            
-    System.out.println("Fecha de Busqueda: "+FechaBusqueda); 
+ 
     }//GEN-LAST:event_jButtonFechaActionPerformed
 
     private void jButtonTituloActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonTituloActionPerformed
-    Titulo=jTextFieldTitulo.getText();
+    
+    String keyword=jTextFieldTitulo.getText();
+    TcpClient cliente=new TcpClient();
+    cliente.addObserver(this);
+    posts=cliente.getPostsByKeyword(keyword);
+    
     }//GEN-LAST:event_jButtonTituloActionPerformed
 
     private void jComboBoxMesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxMesActionPerformed
@@ -456,64 +508,51 @@ jComboBoxMes.addActionListener(new java.awt.event.ActionListener() {
     }//GEN-LAST:event_jTextFieldTituloActionPerformed
 
     private void jButtonAddPubActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddPubActionPerformed
-
+      
        Publicacion pub=new Publicacion(new javax.swing.JFrame(), true);
        pub.setVisible(true);     
-       addBotton(pub.toString());  
-       
+      // addBotton(pub.toString());  
+        Pack post=new Pack(MyState.UPLOAD);
+ 
+        post.addPost(Usuario,pub.getmCategory(),pub.getmTitile(), pub.getmDescription(),pub.getImg());
+      
+        TcpClient cliente=new TcpClient();
+        cliente.uploadPack(post);
+        
+        
     }//GEN-LAST:event_jButtonAddPubActionPerformed
 
-
     
     
-    
-    
-    private void jButtonAddImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddImageActionPerformed
-       JFileChooser jf = new JFileChooser();  //Creando la ventana de opciones
-           int r = jf.showOpenDialog(null);
-           jf.requestFocus();
-           
-       if(r==JFileChooser.APPROVE_OPTION){  //Aqui verificamos si se selecciona un archivo desde la ventana
-               File f = jf.getSelectedFile();
-               String nombre = f.getName();  //Necesitamos las caracteristicas del archivo
-               long tam = f.length();
-               String path = f.getAbsolutePath();
-               System.out.println(path);
-               JLabel label=new JLabel("Label"+indice);
-               label.setIcon(new ImageIcon(path));
-               label.setText("@"+Usuario);
-               jPanelArticulo.add(label);
-               indice++;
-               
-               description+="\n Imagen@"+Usuario;
-              
-               jPanelArticulo.updateUI();       
-       }
-       
-    }//GEN-LAST:event_jButtonAddImageActionPerformed
-
     private void jButtonAddComentarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddComentarioActionPerformed
        JTextArea text=new JTextArea("text"+indice);
-       Font fuente=new Font("Monospaced", Font.BOLD, 16);
+       Font fuente=new Font("Monospaced", Font.BOLD, 12);
        text.setFont(fuente);
        text.setText(jTextArea1.getText()+"\n @"+Usuario);
-       description+=jTextArea1.getText()+"\n @"+Usuario;
+     //  comentarios.setText("\n\n"+jTextArea1.getText()+"\n @"+Usuario);
+      
+       TcpClient cliente=new TcpClient();
+       cliente.sendComment(post_actual.getPostId(),Usuario,jTextArea1.getText()+"   @"+Usuario);
+       System.out.println("id_postactual: "+post_actual.getPostId());
        text.setSize(5, 10);
        jPanelArticulo.add(text);
        indice2++;
        cuerpo.add(text);
+       jTextArea1.setText("");
        jPanelArticulo.updateUI();  
     }//GEN-LAST:event_jButtonAddComentarioActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-             posts=cliente.getListPost();
+        TcpClient cl=new TcpClient();
+        cl.addObserver(this);
+        posts=cl.getListPost();
+    
     }//GEN-LAST:event_jButton1ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButtonAddComentario;
-    private javax.swing.JButton jButtonAddImage;
     private javax.swing.JButton jButtonAddPub;
     private javax.swing.JButton jButtonFecha;
     private javax.swing.JButton jButtonTitulo;
@@ -544,13 +583,14 @@ jComboBoxMes.addActionListener(new java.awt.event.ActionListener() {
     @Override
     public void update(Observable o, Object arg) {
          ArrayList <Pack> posts=(ArrayList <Pack>)arg;
-        
+         jPanelPublicaciones.removeAll();
         for(int i=0;i<posts.size();i++){
             Pack post=new Pack();
             post=posts.get(i);
-            String contenido=post.getTitle()+"   publicado por: @"+post.getNick();       
-            System.out.println(contenido);
-            addBotton(contenido);
+            String contenido=post.listaPost();       
+            System.out.println(post.getPostId());   
+            addBotton(contenido,post.getPostId(),post);
         }
+        jPanelPublicaciones.updateUI();
     }
 }
