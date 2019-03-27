@@ -1,9 +1,14 @@
 package com.manriquez;
 
+import com.manriquez.Const;
+import com.manriquez.Paquete.Data;
 import com.manriquez.Paquete.Pack;
+import com.manriquez.Paquete.PackType;
+import com.manriquez.UtilFun;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,57 +31,33 @@ public class UdpSend {
         }
     }
 
-    public ArrayList<Pack> splitBytes(byte[] src) {
-        ArrayList<Pack> result = new ArrayList<>();
+    public ArrayList<Data> splitBytes(byte[] src) {
+        ArrayList<Data> result = new ArrayList<>();
         final int segmentLen = Const.MAX_UDP_LENGHT >> 1;
         for (int i = 0, j = 0; i < src.length; i += segmentLen, ++j) {
             final byte[] chunk = new byte[segmentLen];
             System.arraycopy(src, i, chunk, 0, segmentLen);
-            result.add(new Pack(chunk, j));
+            result.add(new Data(j, chunk));
         }
         return result;
     }
 
-    public void send() {
-        Pack file = new Pack();
-        sendSecure(); // important to send File data
+    public void send() throws  IOException {
+        Pack<File> metadata = new Pack<>(PackType.FILE_METADATA, file);
+        UtilFun.sendSecure(sock, addr, metadata, PackType.FILE_METADATA); // important to send File data
         byte[] bFile = UtilFun.fileToBytes(file), bPack = new byte[Const.MAX_UDP_LENGHT];
-        ArrayList<Pack> partitionBytes = splitBytes(bFile);
+        ArrayList<Data> partitionBytes = splitBytes(bFile);
         List<Integer> indexesToSend = IntStream.rangeClosed(0, partitionBytes.size() - 1)
                 .boxed().collect(Collectors.toList());
-
         while (!indexesToSend.isEmpty()) {
             indexesToSend.forEach(i -> {
-                DatagramPacket sendPack = new DatagramPacket(
-                        bPack, bPack.length, addr, Const.PORT);
-                sock.send(sendPack);
+                DatagramPacket sendPack = new DatagramPacket(bPack, bPack.length, addr, Const.PORT);
+                try { sock.send(sendPack); } catch (IOException e) { e.printStackTrace(); }
             });
-            List<Integer> sentIndexes = (List<Integer>) receiveSecure();
+            List<Integer> sentIndexes = (List<Integer>) UtilFun.receiveSecure(sock, PackType.INDEXES);
             indexesToSend.removeAll(sentIndexes);
             System.out.printf("Sent %d / %d files.", indexesToSend.size(), partitionBytes.size());
         }
         System.out.println("File " + file.getName() + " sent succesfully.");
     }
-
-    public Pack sendSecure(Pack object) throws IOException {
-        sock.setSoTimeout(TIMEOUT);
-        byte[] objectAsBytes = UtilFun.serialize(object);
-        DatagramPacket inputPack = new DatagramPacket(objectAsBytes, objectAsBytes.length),
-                sendPack = new DatagramPacket(objectAsBytes, objectAsBytes.length, addr, Const.PORT);
-        boolean continueSending = true;
-        for (int countTry = 1; continueSending; ++countTry) {
-            sock.send(sendPack);
-            try {
-                sock.receive(inputPack);
-                System.out.println("Package send at try: " + countTry);
-                continueSending = false;
-            } catch (SocketException e) {
-                // timeOutException, send again
-                System.out.println("Package ack timeout, trying again...");
-            }
-        }
-        return UtilFun.deserialize(inputPack.getData());
-        // sock.setSoTimeout(0); // set sock timeout as infinite
-    }
-
 }

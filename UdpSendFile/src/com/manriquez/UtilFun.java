@@ -1,8 +1,13 @@
 package com.manriquez;
 
+import com.manriquez.Paquete.Pack;
+import com.manriquez.Paquete.PackType;
+
 import java.io.*;
-import java.net.Socket;
+import java.net.*;
 import java.nio.file.Paths;
+
+import static com.manriquez.UdpSend.TIMEOUT;
 
 /**
  *
@@ -62,6 +67,45 @@ public class UtilFun {
         return bytes;
     }
 
+    public static Pack<?> sendSecure(
+            final DatagramSocket sock, final InetAddress addr,
+            final Pack<?> object, final PackType type) throws IOException {
+        sock.setSoTimeout(TIMEOUT);
+        byte[] objectAsBytes = UtilFun.serialize(object);
+        DatagramPacket inputPack = new DatagramPacket(objectAsBytes, objectAsBytes.length),
+                sendPack = new DatagramPacket(objectAsBytes, objectAsBytes.length, addr, Const.PORT);
+        boolean continueSending = true;
+        Pack<?> res = null;
+        for (int countTry = 1; continueSending; ++countTry) {
+            sock.send(sendPack);
+            try {
+                sock.receive(inputPack);
+                res = (Pack<?>) UtilFun.deserialize(inputPack.getData());
+                if (res != null && res.type != type) continue;
+                System.out.println("Package sent at try: " + countTry);
+                continueSending = false;
+            } catch (SocketException e) {
+                // timeOutException, send again
+                System.out.println("Package ack timeout, trying again...");
+            }
+        }
+        return res;
+        // sock.setSoTimeout(0); // set sock timeout as infinite
+    }
+
+    public static Pack<?> receiveSecure(final DatagramSocket sock, final PackType type) {
+        byte[] buff = new byte[Const.MAX_UDP_LENGHT];
+        DatagramPacket packet = new DatagramPacket(buff, buff.length);
+        while (true) {
+            try {
+                sock.receive(packet);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Pack<?> res = (Pack<?>) UtilFun.deserialize(packet.getData());
+            if (res != null && res.type == type) return res;
+        }
+    }
 
     /**
      * You should cast the object returned.
