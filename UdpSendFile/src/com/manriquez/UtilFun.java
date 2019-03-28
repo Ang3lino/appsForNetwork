@@ -1,7 +1,6 @@
 package com.manriquez;
 
 import com.manriquez.Paquete.Pack;
-import com.manriquez.Paquete.PackType;
 
 import java.io.*;
 import java.net.*;
@@ -41,16 +40,16 @@ public class UtilFun {
         }
     }
 
-    public static boolean writeBytes(byte[] src, String filepath) {
+    public static void writeBytes(byte[] src, File file) {
         FileOutputStream fos = null;
+        createFolder(Const.SERVER_FOLDER);
+        String filepath = Paths.get(Const.SERVER_FOLDER, file.getName()).toString();
         try {
             fos = new FileOutputStream(filepath);
             fos.write(src);
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
         }
-        return true;
     }
 
     public static byte[] fileToBytes(File file) {
@@ -67,45 +66,59 @@ public class UtilFun {
         return bytes;
     }
 
-    public static Pack<?> sendSecure(
-            final DatagramSocket sock, final InetAddress addr,
-            final Pack<?> object, final PackType type) throws IOException {
-        sock.setSoTimeout(TIMEOUT);
-        byte[] objectAsBytes = UtilFun.serialize(object);
-        DatagramPacket inputPack = new DatagramPacket(objectAsBytes, objectAsBytes.length),
-                sendPack = new DatagramPacket(objectAsBytes, objectAsBytes.length, addr, Const.PORT);
-        boolean continueSending = true;
-        Pack<?> res = null;
-        for (int countTry = 1; continueSending; ++countTry) {
-            sock.send(sendPack);
-            try {
-                sock.receive(inputPack);
-                res = (Pack<?>) UtilFun.deserialize(inputPack.getData());
-                if (res != null && res.type != type) continue;
-                System.out.println("Package sent at try: " + countTry);
-                continueSending = false;
-            } catch (SocketException e) {
-                // timeOutException, send again
-                System.out.println("Package ack timeout, trying again...");
-            }
+    private static void syncSendDatagramPacket(
+            DatagramSocket sock, DatagramPacket in, DatagramPacket out) {
+        try {
+            sock.send(out);
+            sock.receive(in);
+        } catch (SocketException e) {
+            // timeOutException, send again
+            System.out.println("Package ack timeout, trying again...");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return res;
+    }
+
+    private static boolean attemptSetTimeout(DatagramSocket sock, int timeout) {
+        try {
+            sock.setSoTimeout(TIMEOUT);
+            return true;
+        } catch (SocketException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static <T> Pack<T> sendSecure(
+                final DatagramSocket sock, final InetAddress addr, final Pack<T> sendPack) {
+        if (!attemptSetTimeout(sock, TIMEOUT)) return null;
+
+        byte[] buffObj = UtilFun.serialize(sendPack);
+
+        DatagramPacket inputPack = new DatagramPacket(buffObj, buffObj.length);
+        DatagramPacket outPack = new DatagramPacket(buffObj, buffObj.length, addr, Const.PORT);
+
+        while (true) {
+            syncSendDatagramPacket(sock, inputPack, outPack);
+            Pack<T> res = (Pack<T>) UtilFun.deserialize(inputPack.getData());
+            if (res != null && res.type == sendPack.type) return res;
+        }
         // sock.setSoTimeout(0); // set sock timeout as infinite
     }
 
-    public static Pack<?> receiveSecure(final DatagramSocket sock, final PackType type) {
-        byte[] buff = new byte[Const.MAX_UDP_LENGHT];
-        DatagramPacket packet = new DatagramPacket(buff, buff.length);
-        while (true) {
-            try {
-                sock.receive(packet);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            Pack<?> res = (Pack<?>) UtilFun.deserialize(packet.getData());
-            if (res != null && res.type == type) return res;
-        }
-    }
+//    public static pack<?> receivesecure(final datagramsocket sock, final packtype type) {
+//        byte[] buff = new byte[const.max_udp_lenght];
+//        datagrampacket packet = new datagrampacket(buff, buff.length);
+//        while (true) {
+//            try {
+//                sock.receive(packet);
+//            } catch (ioexception e) {
+//                e.printstacktrace();
+//            }
+//            pack<?> res = (pack<?>) utilfun.deserialize(packet.getdata());
+//            if (res != null && res.type == type) return res;
+//        }
+//    }
 
     /**
      * You should cast the object returned.
