@@ -1,47 +1,49 @@
 package com.manriquez;
 
 import com.manriquez.Paquete.Data;
+import com.manriquez.Paquete.Pack;
+import com.manriquez.Paquete.PackType;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.TreeSet;
+import java.util.List;
+import java.util.Set;
 
 public class UdpReceive {
-    DatagramSocket sock;
-    byte[] buff;
+    private DatagramSocket socket;
+    private boolean running;
+    private byte[] buff = new byte[Const.MAX_UDP_LENGHT];
 
     public UdpReceive() {
         try {
-            sock = new DatagramSocket(Const.PORT);
+            socket = new DatagramSocket(Const.PORT);
         } catch (SocketException e) {
             e.printStackTrace();
         }
     }
 
+    public int partitionSize(final File file) {
+        return (int) Math.ceil( file.length() / (Const.MAX_UDP_LENGHT >> 1) );
+    }
+
     // TODO
     public void receive() throws IOException {
-        DatagramPacket packet = new DatagramPacket(buff, buff.length);
-        sock.receive(packet);
-        File file = (File) UtilFun.deserialize(packet.getData());
-        TreeSet<Data> set = new TreeSet<>();
-
-    }
-
-    public static void partitionBytesWriteFile(TreeSet<Data> src, File file) {
-        byte[] bfile = new byte[(int) file.length()];
-        final int step = src.iterator().next().bytes.length;
-        Iterator<Data> it = src.iterator();
-        for (int destPos = 0; destPos < file.length(); destPos += step) {
-            Data data = it.next();
-            System.arraycopy(data.bytes, 0, bfile, destPos,
-                    file.length() - destPos < step ?
-                            (int) (file.length() - destPos) : data.bytes.length);
+        Pack<File> reqFile = (Pack<File>) UtilFun.receiveSecure(socket, PackType.FILE_METADATA);
+        ArrayList<Data> partitions = new ArrayList<>(partitionSize(reqFile.value));
+        HashSet<Integer> receivedIndexes = new HashSet<>(partitions.size());
+        while (receivedIndexes.size() < partitions.size()) {
+            DatagramPacket packet = new DatagramPacket(buff, buff.length);
+            socket.receive(packet);
+            byte[] bChunk = packet.getData();
+            Pack<Data> chunkPack = (Pack<Data>) UtilFun.deserialize(bChunk);
+            partitions.add(chunkPack.value.index, chunkPack.value);
+            receivedIndexes.add(chunkPack.value.index);
         }
-        UtilFun.writeBytes(bfile, file);
     }
+
 }
