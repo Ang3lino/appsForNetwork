@@ -18,8 +18,12 @@ while True: # listen until process killed
     connection, address = sockobj.accept() # wait for the next client connection
     print('Connection from', address) 
     data = connection.recv(1024) # read next line on client socket
-    difficulty = int.from_bytes(data) % 3 # guaranteed i in [0,1,2]
-    res = words_dict[difficulty][randint(0, len(words_dict[difficulty]))]
+    difficulty = int.from_bytes(data, byteorder='big') % 3 # guaranteed i in [0,1,2]
+    print('difficulty', difficulty)
+    list_words = words_dict[difficulty]
+    rand_index = randint(0, len(list_words))
+    print(rand_index)
+    res = list_words[rand_index]
     print('Word sent =>', res)
-    connection.send(bytes(res))
+    connection.send(str.encode(res))
     connection.close()

@@ -8,7 +8,7 @@ client.connect(PORT, HOST, function() {
 
     console.log('CONNECTED TO: ' + HOST + ':' + PORT);
     // Write a message to the socket as soon as the client is connected, the server will receive it as message from the client 
-    client.write(1);
+    client.write('2');
 });
 
 client.on('data', function(data) { // response obtained from server
