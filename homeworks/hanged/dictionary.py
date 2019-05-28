@@ -10,7 +10,9 @@ def load():
     result = dict()
     for i in range(3): result[i] = list()
     with open('listado-general.txt', 'r') as fp:
-        words = tuple( filter(lambda w: len(w) > 3, fp.read().split("\n")) ) # filter object is not iterable
+        words = fp.read().split("\n") # it doesn't work on windows ?!
+        #print(words)
+        words = tuple( filter(lambda w: len(w) > 3, words) )# filter object is not iterable
         step = int(longest_word_size(words) / 3)
         for word in words: 
             k = len(word)

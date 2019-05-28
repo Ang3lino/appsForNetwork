@@ -5,7 +5,8 @@ const PORT = 6969;
 
 const readline = require('readline').createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
+    terminal: false
 })
 
 const client = new net.Socket();
@@ -13,10 +14,10 @@ const client = new net.Socket();
 client.connect(PORT, HOST, function () {
     console.log('CONNECTED TO: ' + HOST + ':' + PORT);
 
+    console.log(`Choose a difficulty (0, 1, 2): `)
     // Write a message to the socket as soon as the client is connected, the server will receive it as message from the client 
-    readline.question(`Choose a difficulty (0, 1, 2): `, input => {
+    readline.on('line', input => {
         client.write(input);
-        readline.close();
     })
 });
 
@@ -27,7 +28,8 @@ client.on('data', function (data) { // response obtained from server, type objec
 
 // Add a 'close' event handler for the client socket
 client.on('close', function () {
-    console.log('Connection closed');
+    // console.log('Connection closed');
+    console.log('   closed');
 });
 
 zip = rows => rows[0].map((_, c) => rows.map(row => row[c]))
@@ -40,13 +42,24 @@ function play(word) {
     let lives = 3, indexes = initialHelp(word), question = '_'.repeat(word.length)
     for (let i = 0; i < lives; ++i) {
         indexes.forEach(j => question = question.replaceAt(j, word.charAt(j)))
-        readline.question(`Type: ${question}`, oinput => {
-            input = oinput.slice(0, word.length)
-            zip(input, word).filter(t => t[0] === t[1]).forEach(t => indexes.add(t[0]))
+        console.log(`Type: ${question}`)
+        readline.on('line', oinput => {
+            print(oinput)
+            const input = oinput.slice(0, word.length)
+            print(input)
+            matchedIndexes(input, word).forEach(j => indexes.add(j))
         })
         if (indexes.length === word.length) return true
     }
     return false
+}
+
+function matchedIndexes(input, source) {
+    let indexes = new Set()
+    for (let i = 0; i < source.length; ++i) {
+        if (input.charAt(i) === source.charAt(i)) indexes.add(i)
+    }
+    return indexes
 }
 
 // inclusive range
