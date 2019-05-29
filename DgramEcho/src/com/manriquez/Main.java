@@ -1,4 +1,3 @@
-package com.manriquez;
 
 public class Main {
     EchoClient client;
