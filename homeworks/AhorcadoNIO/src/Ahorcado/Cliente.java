@@ -20,10 +20,7 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import javax.swing.JOptionPane;
 
-/**
- *
- * @author Martin
- */
+
 public class Cliente {
 
     public static void imprimir(String palabra) {

@@ -7,10 +7,6 @@ package Ahorcado;
 
 import java.io.Serializable;
 
-/**
- *
- * @author Martin
- */
 public class Objeto implements Serializable {
 
     String palabra;

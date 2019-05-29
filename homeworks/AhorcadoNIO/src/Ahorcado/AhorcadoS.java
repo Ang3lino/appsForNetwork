@@ -11,10 +11,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-/**
- *
- * @author Martin Funciona
- */
 public class AhorcadoS {
 
     public static void main(String[] args) {

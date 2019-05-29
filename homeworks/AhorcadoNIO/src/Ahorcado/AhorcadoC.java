@@ -15,11 +15,7 @@ import java.nio.*;
 import java.net.*;
 import java.util.Iterator;
 
-/**
- *
- * @author Martin
- * Funciona
- */
+
 public class AhorcadoC {
     
     public static void imprimir(String palabra){

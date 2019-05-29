@@ -1,8 +1,4 @@
 
-/**
- *
- * @author Martin
- */
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.nio.*;
