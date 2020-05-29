@@ -16,9 +16,9 @@ def receive(conn):
     while len(bytes_) < length:
         to_read = length - len(bytes_)
         bytes_ += conn.recv(4096 if to_read > 4096 else to_read)
-        print(len(bytes_))
+        # print(len(bytes_))
     return bytes_
 
 
 # with open('./client.py', 'r') as fp:
-#     data = fp.read()
+#     data = fp.read() # bytes
