@@ -8,11 +8,10 @@ def send(sock, data):
     data_len = struct.pack('>Q', len(data_str))
     sock.send(data_len)
     sock.sendall(data_str)
-    
+
 def receive(conn):
     buff = conn.recv(8)  # expect an int, IMPORTANT to recv eight
     (length,) = struct.unpack('>Q', buff)  # how many bytes we got
-    print(length)
     bytes_ = b''
     while len(bytes_) < length:
         to_read = length - len(bytes_)

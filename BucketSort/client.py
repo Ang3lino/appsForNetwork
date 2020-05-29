@@ -9,20 +9,17 @@ import reliable
 import time 
 
 
-
 def server(HOST, PORT):
-    s_req = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # create a TCP Server
-    s_req.bind((HOST, PORT))
-    s_req.listen(1)
-    conn, addr = s_req.accept()
-    s_req.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-    print(f'Server {HOST}:{PORT} waiting for a client')
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # create a TCP Server
+    s.bind((HOST, PORT))
+    s.listen(1)
+    print('esperando accept')
+    conn, addr = s.accept()
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    print('esperando recv')
     object_ = pickle.loads(reliable.receive(conn))
-    print(f'Server {HOST}:{PORT} got a client ({addr})')
     object_.sort()
-    print(object_)
-
+    # print(object_)
     reliable.send(conn, object_)
     conn.close()
 
@@ -46,35 +43,33 @@ def chunks(lst, n):
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
 
-def client(HOST, PORT, arr):
+def client(HOST, PORT, arr, result, i):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # create TCP Socket
     s.connect((HOST, PORT))
     reliable.send(s, arr)
     res = pickle.loads(reliable.receive(s))
-    print(res)
-    # result[i] = res
+    # print(res)
+    result[i] = res
     s.close()
 
 
-n_threads = 1
-# result_arr = [None] * n_threads
-rand_arr = [random.randint(0, 5000) for _ in range(100000)]
-# partition = list(chunks(rand_arr, int(len(rand_arr) / n_threads)))  # !!
+n_threads = 4
+result_arr = [None] * n_threads
+rand_arr = [random.randint(0, 70_000) for _ in range(8000)]
+partition = list(chunks(rand_arr, int(len(rand_arr) / n_threads)))  # !!
 HOST = 'localhost'
 PORT = 50007
 
-# servers = [threading.Thread(target=server, args=(HOST, PORT + i)) for i in range(n_threads)]
-# for t in servers:
-#     t.start()
+# start the servers
+servers = [threading.Thread(target=server, args=(HOST, PORT + i)) for i in range(n_threads)]
+for t in servers: t.start()
 
-# clients = [threading.Thread(target=client, args=(HOST, PORT + i, partition[i], result_arr, i)) 
-#         for i in range(n_threads)]
-# for t in clients:
-#     t.start()
-# for t in clients:
-#     t.join()
-# print(partition)
-client(HOST, PORT, rand_arr)
-# print(result_arr)
-# print(merge(result_arr))
+clients = [threading.Thread(target=client, args=(HOST, PORT + i, partition[i], result_arr, i)) 
+        for i in range(n_threads)]
+for t in clients: t.start()
+for t in clients: t.join()
+print(merge(result_arr))
 
+for t in servers: t.join()
+
+# client(HOST, PORT, rand_arr)
