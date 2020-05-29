@@ -9,8 +9,6 @@ import reliable
 import time 
 
 
-from struct import pack, unpack   
-
 
 def server(HOST, PORT):
     s_req = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # create a TCP Server
@@ -60,7 +58,7 @@ def client(HOST, PORT, arr):
 
 n_threads = 1
 # result_arr = [None] * n_threads
-rand_arr = [random.randint(0, 1000) for _ in range(5_000)]
+rand_arr = [random.randint(0, 5000) for _ in range(100000)]
 # partition = list(chunks(rand_arr, int(len(rand_arr) / n_threads)))  # !!
 HOST = 'localhost'
 PORT = 50007
