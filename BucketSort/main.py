@@ -2,32 +2,21 @@
 import socket
 import pickle
 import threading
+import random
+import functools
+import sys
+
+from struct import pack, unpack
 
 
-class Angel:
-    def __init__(self):
-        pass
-
-    def __str__(self):
-        return 'Wusup Im Angel'
+msg_len = 4096
 
 
-def server(HOST, PORT):
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind((HOST, PORT))
-    s.listen(1)
-    conn, addr = s.accept()
-    print('Connected by', addr)
+def chunks(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
 
-    data = conn.recv(4096)
-    data_variable = pickle.loads(data)
-    print(data)
-    print(data_variable)
-    conn.close()
-
-
-thread = threading.Thread(target=server, args=('localhost', 50007))
-thread.start()
 
 HOST = 'localhost'
 PORT = 50007
@@ -35,11 +24,20 @@ PORT = 50007
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
 
-# Create an instance of ProcessData() to send to server.
-variable = Angel()
-# Pickle the object and send it to the server
-data_string = pickle.dumps(variable)
-s.send(data_string)
+data = [random.randint(0, 10_000) for _ in range(5000)]
 
+data_str = pickle.dumps(data)
+data_len = pickle.dumps(len(data_str))
+
+s.send(data_len)
+s.sendall(data_str)
+
+print(data_str)
 s.close()
+
 print ('Data Sent to Server')
+
+
+
+
+
